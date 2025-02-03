@@ -5,6 +5,7 @@ There are two ways to run this API locally.
 1. Use docker-compose (ensure docker-compose is installed and available)
 
     cd <CLONE_FOLDER>/api/tms
+   
     docker-compose up --build
 
     Verify that API and databases are up:
