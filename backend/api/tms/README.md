@@ -8,11 +8,12 @@ There are two ways to run this API locally.
     docker-compose up --build
 
     Verify that API and databases are up:
-        1. API: http://localhost:4144/v1/health
-        2. Database: connect via pgadmin to port 5454
+   
+      1. API: http://localhost:4144/v1/health
+      2. Database: connect via pgadmin to port 5454
 
 
-2. Use without docker - call the run script directly  
+3. Use without docker - call the run script directly  
 
     Verify postgres is available and running. 
     Update .env to the correct database parameters
@@ -22,9 +23,9 @@ There are two ways to run this API locally.
 
     Run pre-requisite database migrations via cmd: (install npx if not available)
 
-        npx typeorm-ts-node-commonjs migration:run -d ./src/common/db.connection.ts
+    npx typeorm-ts-node-commonjs migration:run -d ./src/common/db.connection.ts
 
-        Verify tables are created and available
+    Verify tables are created and available
 
     npm run dev
 
