@@ -13,5 +13,6 @@ export class Routes {
         app.route(RoutesConstants.CREATE_TENANTS).post((req:Request,res:Response) => this.tmsController.createTenant(req,res))
         app.route(RoutesConstants.ADD_TENANT_USERS).post((req:Request,res:Response) => this.tmsController.addTenantUsers(req,res))
         app.route(RoutesConstants.GET_USER_TENANTS).get((req:Request,res:Response) => this.tmsController.getTenantsForUser(req,res))
+        app.route(RoutesConstants.GET_TENANT_USERS).get((req:Request,res:Response) => this.tmsController.getUsersForTenant(req,res))
     }
 }

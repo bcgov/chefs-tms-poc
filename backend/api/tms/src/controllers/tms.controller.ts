@@ -62,5 +62,17 @@ export class TMSController {
             console.log(error)
             this.errorHandler.generalError(res,"Error occurred getting tenants for a user", error.message, 500, "Internal Server Error")
         }
+              
+    }
+
+    public async getUsersForTenant(req:Request, res:Response) {
+        try {
+            const users = await this.tmsService.getUsersForTenant(req)
+            res.status(200).send(users)
+        }
+        catch(error) {
+            console.log(error)
+            this.errorHandler.generalError(res,"Error occurred getting users for a tenant", error.message, 500, "Internal Server Error")
+        }
     }
 }

@@ -15,7 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
 
   tms-api:
-    build: .  # Builds the image from the local Dockerfile
+    build: . 
     container_name: tms-api
     restart: unless-stopped
     depends_on:
@@ -29,7 +29,7 @@ services:
       DB_PASSWORD: mysecretpassword
       DB_DATABASE: tmsdb
     ports:
-      - "4144:4144"  # Adjust to match your API’s exposed port
+      - "4144:4144"
     networks:
       - tms_network
 volumes:

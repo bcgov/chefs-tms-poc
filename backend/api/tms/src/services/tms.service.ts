@@ -8,18 +8,18 @@ require('dotenv').config()
 
 export class TMSService {
 
+    tmsRepository:TMSRepository = new TMSRepository(connection.manager)
+    
     public async createTenant(req:Request) {
-        const tmsRepository:TMSRepository = new TMSRepository(connection.manager);        
+        
         const tenant:Tenant = await this.setTenant(req)        
-        const savedTenant = await tmsRepository.createTenant(tenant)
+        const savedTenant = await this.tmsRepository.createTenant(tenant)
         return savedTenant
     }
 
-    public async addTenantUsers(req:Request) {
-        const tmsRepository:TMSRepository = new TMSRepository(connection.manager);
-        const tenant:Tenant = await tmsRepository.findTenant(req.params.id)
-       // console.log(tenant)
-       
+    public async addTenantUsers(req:Request) {       
+        const tenant:Tenant = await this.tmsRepository.findTenant(req.params.id)
+              
         if(!tenant) {
             throw new Error("Tenant not found")
         }        
@@ -35,16 +35,20 @@ export class TMSService {
         }
 
         //console.log(tenantUsers)
-        const savedUsers = await tmsRepository.addTenantUsers(tenantUsers)
+        const savedUsers = await this.tmsRepository.addTenantUsers(tenantUsers)
         return savedUsers
     }
 
     public async getTenantsForUser(req:Request) {
 
-        const tmsRepository:TMSRepository = new TMSRepository(connection.manager);
-        const tenants = await tmsRepository.getTenantsForUser(req.params.ssoUserId)
+        const tenants = await this.tmsRepository.getTenantsForUser(req.params.ssoUserId)
         return tenants
 
+    }
+    
+    public async getUsersForTenant(req:Request) {
+        const users = await this.tmsRepository.getUsersForTenant(req.params.id)
+        return users
     }
 
     private async setTenant(req:Request) {

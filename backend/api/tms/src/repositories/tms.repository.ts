@@ -33,4 +33,13 @@ export class TMSRepository {
             .getMany();
         return tenants;
     }
+
+    public async getUsersForTenant(id:string) {
+        const users = await this.manager
+            .createQueryBuilder(TenantUser,"tenantUser")
+            .innerJoinAndSelect("tenantUser.tenant","tenant")
+            .where("tenant.id = :id", {id})
+            .getMany();
+        return users
+    }
 }
