@@ -1,0 +1,17 @@
+import { Request, Response } from 'express'
+import { RoutesConstants } from '../common/routes.constants'
+import {TMSController} from '../controllers/tms.controller'
+
+require('dotenv').config()
+
+export class Routes {
+
+    public tmsController:TMSController = new TMSController()
+
+    public routes (app:any) {
+        app.route(RoutesConstants.HEALTH).get((req:Request, res:Response) => this.tmsController.health(req, res))
+        app.route(RoutesConstants.CREATE_TENANTS).post((req:Request,res:Response) => this.tmsController.createTenant(req,res))
+        app.route(RoutesConstants.ADD_TENANT_USERS).post((req:Request,res:Response) => this.tmsController.addTenantUsers(req,res))
+        app.route(RoutesConstants.GET_USER_TENANTS).get((req:Request,res:Response) => this.tmsController.getTenantsForUser(req,res))
+    }
+}
