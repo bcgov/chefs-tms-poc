@@ -20,6 +20,7 @@ There are two ways to run this API locally.
     Update .env to the correct database parameters
     
     cd <CLONE_FOLDER>/api/tms
+
     npm install
 
     Run pre-requisite database migrations via cmd: (install npx if not available)
