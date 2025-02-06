@@ -1,8 +1,7 @@
 import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
+import { SSOUser } from '../entities/SSOUser'
 import { EntityManager } from 'typeorm'
-
-require ('dotenv').config()
 
 export class TMSRepository {
 
@@ -10,7 +9,7 @@ export class TMSRepository {
         this.manager = manager
       }
 
-    public async createTenant(tenant:Tenant) {
+    public async saveTenant(tenant:Tenant) {
         const savedTenant = await this.manager.save(tenant)
         return savedTenant
     }
@@ -26,20 +25,43 @@ export class TMSRepository {
     }
 
     public async getTenantsForUser(ssoUserId:string) {
-        const tenants = await this.manager
-            .createQueryBuilder(Tenant, "tenant")
-            .innerJoin("tenant.users", "tenantUser")
-            .where("tenantUser.ssoUserId = :ssoUserId", { ssoUserId })
+        const tenants = this.manager.createQueryBuilder(Tenant, "t")
+            .innerJoin("t.users", "tu")
+            .innerJoin("tu.ssoUser", "su")
+            .where("su.ssoUserId = :ssoUserId", { ssoUserId })
             .getMany();
         return tenants;
     }
 
-    public async getUsersForTenant(id:string) {
+    public async getUsersForTenant(tenantId:string) {
         const users = await this.manager
-            .createQueryBuilder(TenantUser,"tenantUser")
-            .innerJoinAndSelect("tenantUser.tenant","tenant")
-            .where("tenant.id = :id", {id})
+            .createQueryBuilder(SSOUser, "su")
+            .innerJoin(TenantUser, "tu", "tu.sso_id = su.id")
+            .where("tu.tenant_id = :tenantId", { tenantId })
             .getMany();
         return users
     }
+
+    public async getSSOUserById(ssoUserId:string) {
+        const ssoUser = await this.manager.findOne(SSOUser,{where:{ssoUserId:ssoUserId}})
+        return ssoUser
+
+    }
+
+    public async saveSSOUser(ssoUser:SSOUser) {
+        const savedSSOUser:SSOUser = await this.manager.save(ssoUser)
+        return savedSSOUser
+    }
+
+    public async checkIfUserExistsForTenant(ssoUserId:string, tenantId:string) {
+        const userExistsForTenant = await this.manager.createQueryBuilder()
+            .from(TenantUser, "tu")
+            .innerJoin(Tenant, "t", "tu.tenant_id = t.id")
+            .innerJoin(SSOUser, "su", "tu.sso_id = su.id")
+            .where("t.id = :tenantId", { tenantId })
+            .andWhere("su.ssoUserId = :ssoUserId", { ssoUserId })
+            .getExists();        
+        return userExistsForTenant                                
+    }
 }
+

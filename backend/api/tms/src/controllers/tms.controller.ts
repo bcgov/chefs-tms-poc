@@ -18,23 +18,8 @@ export class TMSController {
 
     public async createTenant(req:Request, res:Response) {
     try {
-        const savedTenant = await this.tmsService.createTenant(req)
-        const tenantResponse = {
-            tenant: {
-                id: savedTenant.id,
-                name: savedTenant.name,
-                createdDateTime: savedTenant.createdDateTime,
-                updatedDateTime: savedTenant.updatedDateTime,
-                users: [
-                    {
-                        id:savedTenant.users[0].id,
-                        ssoUserId:savedTenant.users[0].ssoUserId,
-                        role:savedTenant.users[0].role
-                    }
-                ]
-            }
-        }
-            res.status(201).send(tenantResponse);
+        const tenantResponse = await this.tmsService.createTenant(req)
+        res.status(201).send(tenantResponse);
     } 
     catch(error) {
             console.log(error)

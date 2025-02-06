@@ -27,6 +27,7 @@
     "dependencies": {
         "@types/joi": "^17.2.3",
         "@types/node-fetch": "^2.5.10",
+        "class-transformer": "^0.5.1",
         "cls-rtracer": "^2.6.0",
         "cors": "^2.8.5",
         "date-fns": "^2.29.3",

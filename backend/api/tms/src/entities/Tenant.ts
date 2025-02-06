@@ -10,6 +10,9 @@ export class Tenant {
       @Column({length:30, name:'name', unique: true})
       name:string
 
+      @Column({length:100, name:'ministry_name, unique: true'})
+      ministryName:string
+
       @OneToMany(()=>TenantUser,(tenantUser) => tenantUser.tenant, {
         cascade:true,
       })

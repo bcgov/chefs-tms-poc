@@ -8,7 +8,7 @@ export const connection = AppDataSource
 
 AppDataSource.initialize()
     .then(() => {
-        console.log("Data Source has been initialized!");
+        console.log("Connected to database: "+ process.env.DB_HOST + " "+process.env.DB_PORT);
     })
     .catch((err) => {
         console.error("Error during Data Source initialization", err);
