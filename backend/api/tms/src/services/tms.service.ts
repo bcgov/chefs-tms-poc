@@ -14,7 +14,7 @@ export class TMSService {
         const tenant:Tenant = await this.setTenant(req)        
         const savedTenant = await this.tmsRepository.saveTenant(tenant)
         return {
-            "data": await this.setTenantResponse(savedTenant)
+            data : await this.setTenantResponse(savedTenant)
         }                
     }
 
