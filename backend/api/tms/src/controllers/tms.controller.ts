@@ -1,6 +1,7 @@
 import { Request, Response } from 'express'
 import { TMSService } from '../services/tms.service'
 import { ErrorHandler } from '../common/error.handler';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class TMSController {
 
@@ -34,9 +35,12 @@ export class TMSController {
         }
         catch(error) {
             console.log(error)
-            this.errorHandler.generalError(res,"Error occurred adding user(s) to tenant", error.message, 500, "Internal Server Error")
+            if (error instanceof NotFoundError) {
+                this.errorHandler.generalError(res,"Error occurred during tenant creation", error.message, error.statusCode, "Not Found")
+            } 
+                this.errorHandler.generalError(res,"Error occurred during tenant creation", error.message, 500, "Internal Server Error")
+            }
         }
-    }
 
     public async getTenantsForUser(req:Request,res:Response) {
         try {

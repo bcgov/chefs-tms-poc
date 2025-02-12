@@ -4,6 +4,7 @@ import { connection } from '../common/db.connection'
 import { Tenant } from '../entities/Tenant';
 import { TenantUser } from '../entities/TenantUser';
 import { SSOUser } from '../entities/SSOUser';
+import { NotFoundError } from '../errors/NotFoundError';
 
 export class TMSService {
 
@@ -22,7 +23,7 @@ export class TMSService {
         const tenant:Tenant = await this.tmsRepository.findTenant(req.params.id)
               
         if(!tenant) {
-            throw new Error("Tenant not found")
+            throw new NotFoundError("Tenant not found: "+req.params.id)
         }        
         const tenantUsers:TenantUser[] = [] 
         
