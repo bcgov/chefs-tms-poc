@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index, OneToOne } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, Timestamp, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn, Index, OneToMany } from 'typeorm'
 import { Tenant } from './Tenant'
 import { SSOUser } from './SSOUser'
+import {TenantUserRole} from './TenantUserRole'
 
 @Entity('TenantUser')
 export class TenantUser {
@@ -8,7 +9,7 @@ export class TenantUser {
     @PrimaryGeneratedColumn('uuid')
     id:string
 
-    @ManyToOne(() => SSOUser, { eager: true })
+    @ManyToOne(() => SSOUser)
     @JoinColumn({ name: 'sso_id' })
     ssoUser: SSOUser
 
@@ -16,8 +17,10 @@ export class TenantUser {
     @JoinColumn({ name: 'tenant_id' })
     tenant: Tenant
   
-    @Column({ type: 'varchar', length: 100 })
-    role: string
+    @OneToMany(() => TenantUserRole, (tur) => tur.tenantUser, {
+        cascade: true,
+    })
+    roles: TenantUserRole[];
 
     @CreateDateColumn({ type: 'timestamp', name: 'created_datetime' })
     createdDateTime : Timestamp

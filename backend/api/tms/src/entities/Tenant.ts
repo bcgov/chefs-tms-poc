@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, Timestamp, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm'
+import { Entity, PrimaryGeneratedColumn, Column, Timestamp, CreateDateColumn, UpdateDateColumn, OneToMany, DefaultNamingStrategy } from 'typeorm'
 import { TenantUser } from './TenantUser'
+import { Role } from './Role'
 
 @Entity('Tenant')
 export class Tenant {
@@ -10,13 +11,18 @@ export class Tenant {
       @Column({length:30, name:'name', unique: true})
       name:string
 
-      @Column({length:100, name:'ministry_name, unique: true'})
+      @Column({length:100, name:'ministry_name', unique: true})
       ministryName:string
 
       @OneToMany(()=>TenantUser,(tenantUser) => tenantUser.tenant, {
         cascade:true,
       })
       users:TenantUser[]
+
+      @OneToMany(() => Role, (role) => role.tenant, {
+        cascade: true,
+      })
+      roles: Role[];
 
       @CreateDateColumn({ type: 'timestamp', name: 'created_datetime' })
       createdDateTime : Timestamp

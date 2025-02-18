@@ -11,11 +11,11 @@ export class TMSService {
     tmsRepository:TMSRepository = new TMSRepository(connection.manager)
     
     public async createTenant(req:Request) {
-        
-        const tenant:Tenant = await this.setTenant(req)        
-        const savedTenant = await this.tmsRepository.saveTenant(tenant)
+        console.log('hello')
+        const savedTenant = await this.tmsRepository.saveTenant(req)
+        console.log(savedTenant)
         return {
-            data : await this.setTenantResponse(savedTenant)
+            data : savedTenant
         }                
     }
 
@@ -31,9 +31,8 @@ export class TMSService {
            const userExistsForTenant = await this.tmsRepository.checkIfUserExistsForTenant(user.ssoUserId,req.params.id)            
            if(!userExistsForTenant) {
             const tenantUser:TenantUser = new TenantUser()
-            const mappedUser:SSOUser = await this.mapSSOUser(user)
-            tenantUser.role = user.role
-            tenantUser.ssoUser = mappedUser
+        //    const mappedUser:SSOUser = await this.tmsRepository.mapSSOUser(user)
+       //     tenantUser.ssoUser = mappedUser
             tenantUser.tenant = tenant
             tenantUsers.push(tenantUser)
            }           
@@ -67,46 +66,6 @@ export class TMSService {
         }
     }
 
-    private async setTenant(req:Request) {
-
-       const tenant:Tenant = new Tenant()
-       const tenantUser:TenantUser = new TenantUser()
-
-       tenant.name = req.body.name
-       tenant.ministryName = req.body.ministryName
-
-       const ssoUser:SSOUser = await this.mapSSOUser(req.body.user)       
-       tenantUser.ssoUser = ssoUser
-              
-       tenantUser.role = req.body.user.role
-       tenantUser.tenant = tenant
-       tenant.users = [tenantUser]
-
-       const savedTenant = await this.tmsRepository.saveTenant(tenant)
-
-       return savedTenant
-
-    }
-
-    private async mapSSOUser(user:any) {  
-
-       var ssoUser = await this.tmsRepository.getSSOUserById(user.ssoUserId)
-
-       if(!ssoUser) { 
-
-        const newSSOUser:SSOUser = new SSOUser()
-        newSSOUser.firstName = user.firstName
-        newSSOUser.lastName = user.lastName
-        newSSOUser.displayName = user.displayName
-        newSSOUser.userName = user.userName
-        newSSOUser.ssoUserId = user.ssoUserId
-        newSSOUser.email = user.email        
-
-        ssoUser = await this.tmsRepository.saveSSOUser(newSSOUser)
-       }
-       return ssoUser        
-    }
-
     private async setTenantResponse(tenant:Tenant) {
 
         const users = tenant.users.map(user =>({
@@ -117,7 +76,6 @@ export class TMSService {
             "displayName":user.ssoUser.displayName,
             "email":user.ssoUser.email,
             "ssoUserId":user.ssoUser.ssoUserId,
-            "role":user.role,            
             "createdDateTime":user.ssoUser.createdDateTime,
             "updatedDateTime":user.ssoUser.updatedDateTime
         }))
