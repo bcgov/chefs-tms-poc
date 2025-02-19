@@ -48,6 +48,15 @@ export class TMSService {
         }
     }
 
+    public async createRoles(req:Request) {
+        const roles = await this.tmsRepository.createRoles(req)
+        return {
+            data: {
+                role:roles
+            }
+        }
+    }
+
     private async setTenantResponse(tenant:Tenant) {
 
         const users = tenant.users.map(user =>({

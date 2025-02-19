@@ -65,6 +65,45 @@ export class TMSRepository {
 
     }
 
+    public async createRoles(req:Request) {
+        let response = {}
+        await this.manager.transaction(async(transactionEntityManager) => {
+
+            try {
+
+                const tenantId:string = req.params.id
+
+                const requestRole = req.body.role
+
+                const tenant:Tenant = await transactionEntityManager.findOne(Tenant,{where: {id:tenantId}})
+                if(!tenant) {  
+                    throw new NotFoundError("Tenant Not Found: "+tenantId)
+                }
+
+                const dbRoles:Role [] = await this.findRoles([requestRole.name],tenantId)
+
+                if(dbRoles?.length !== 0) {
+                    throw new ConflictError("Role already exists for tenant: "+tenantId + " : " + requestRole.name)
+                }   
+
+                const role:Role = new Role()
+                role.name = requestRole.name
+                role.description = requestRole.description
+                role.tenant = tenant
+                const savedRole = await transactionEntityManager.save(role)
+                response = savedRole
+
+            }
+            catch(error) {
+                console.error('Create Role for tenant transaction failure - rolling back inserts ',error)
+                throw error
+            }
+
+        });
+
+        return response
+    }
+
     public async checkIfTenantExists(tenantId:string) {
         const tenantExists = await this.manager
             .createQueryBuilder()
@@ -115,9 +154,17 @@ export class TMSRepository {
         return savedRoles
     }
 
-    public async findRoles(roleNames:string[]) {
-        const roles = await this.manager.find(Role,{where:{name:In(roleNames)}})        
+    public async findRoles(roleNames:string[],tenantId:string) {
+
+        const whereCondition: any = { name: In(roleNames) };
+
+        if (tenantId) {
+            whereCondition["tenant"] = { id: tenantId }
+        }
+        
+        const roles:Role [] = await this.manager.find(Role, { where: whereCondition });
         return roles ?? []
+
     }
 
     private async setSSOUser(ssoUserId:string, firstName:string, lastName:string, displayName:string,userName:string, email:string) {
@@ -142,13 +189,7 @@ export class TMSRepository {
             const tenantUser:TenantUser = new TenantUser()
             const ssoUser:SSOUser = await this.setSSOUser(req.body.user.ssoUserId,req.body.user.firstName,req.body.user.lastName,req.body.user.displayName,
                 req.body.user.userName,req.body.user.email)
-            // if(!ssoUser.id) {
-            //     const savedSSOUser:SSOUser = await transactionEntityManager.save(ssoUser)
-            //     tenantUser.ssoUser = savedSSOUser    
-            // }
-            // else {
-                tenantUser.ssoUser = ssoUser
-            //}
+            tenantUser.ssoUser = ssoUser
             const tenant:Tenant = new Tenant()
             tenant.ministryName = req.body.ministryName
             tenant.name = req.body.name
@@ -158,7 +199,7 @@ export class TMSRepository {
         
             const globalTenantRoles = ["TMS.TENANT_ADMIN","TMS.TENANT_USER"]
         
-            const roles:Role[] = await this.findRoles(globalTenantRoles)
+            const roles:Role[] = await this.findRoles(globalTenantRoles,null)
 
             let savedRoles:Role[]
 
