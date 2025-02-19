@@ -13,14 +13,14 @@ export class TMSService {
     public async createTenant(req:Request) {
         const savedTenant = await this.tmsRepository.saveTenant(req)
         return {
-            data : savedTenant
-        }                
+            data: { 
+                tenant:savedTenant
+            }   
+        }       
     }
 
     public async addTenantUser(req:Request) {       
-       
         const response = await this.tmsRepository.addTenantUsers(req)
-
         return {
             data: { 
                 user:response
@@ -30,7 +30,6 @@ export class TMSService {
     }
 
     public async getTenantsForUser(req:Request) {
-
         const tenants = await this.tmsRepository.getTenantsForUser(req.params.ssoUserId)
         return {
             data: {
@@ -56,32 +55,5 @@ export class TMSService {
             }
         }
     }
-
-    private async setTenantResponse(tenant:Tenant) {
-
-        const users = tenant.users.map(user =>({
-            "id":user.id,
-            "firstName":user.ssoUser.firstName,
-            "lastName":user.ssoUser.lastName,
-            "userName":user.ssoUser.userName,
-            "displayName":user.ssoUser.displayName,
-            "email":user.ssoUser.email,
-            "ssoUserId":user.ssoUser.ssoUserId,
-            "createdDateTime":user.ssoUser.createdDateTime,
-            "updatedDateTime":user.ssoUser.updatedDateTime
-        }))
-
-        const tenantResponse = {          
-              "tenant":  {
-                    "id": tenant.id,
-                    "name":tenant.name,
-                    "ministryName":tenant.ministryName,
-                    "createdDateTime": tenant.createdDateTime,
-                    "updatedDateTime": tenant.updatedDateTime,
-                    "users":users
-                }
-            }
-            return tenantResponse
-        }
     
 }
