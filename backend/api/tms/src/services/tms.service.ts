@@ -11,37 +11,19 @@ export class TMSService {
     tmsRepository:TMSRepository = new TMSRepository(connection.manager)
     
     public async createTenant(req:Request) {
-        console.log('hello')
         const savedTenant = await this.tmsRepository.saveTenant(req)
-        console.log(savedTenant)
         return {
             data : savedTenant
         }                
     }
 
-    public async addTenantUsers(req:Request) {       
-        const tenant:Tenant = await this.tmsRepository.findTenant(req.params.id)
-              
-        if(!tenant) {
-            throw new NotFoundError("Tenant not found: "+req.params.id)
-        }        
-        const tenantUsers:TenantUser[] = [] 
-        
-        for(const user of req.body.users) {   
-           const userExistsForTenant = await this.tmsRepository.checkIfUserExistsForTenant(user.ssoUserId,req.params.id)            
-           if(!userExistsForTenant) {
-            const tenantUser:TenantUser = new TenantUser()
-        //    const mappedUser:SSOUser = await this.tmsRepository.mapSSOUser(user)
-       //     tenantUser.ssoUser = mappedUser
-            tenantUser.tenant = tenant
-            tenantUsers.push(tenantUser)
-           }           
-        }
-        const users = await this.tmsRepository.addTenantUsers(tenantUsers)
+    public async addTenantUser(req:Request) {       
+       
+        const response = await this.tmsRepository.addTenantUsers(req)
 
         return {
             data: { 
-                users 
+                user:response
             } 
         }
         

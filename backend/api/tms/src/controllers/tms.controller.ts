@@ -2,6 +2,7 @@ import { Request, Response } from 'express'
 import { TMSService } from '../services/tms.service'
 import { ErrorHandler } from '../common/error.handler';
 import { NotFoundError } from '../errors/NotFoundError';
+import { ConflictError } from '../errors/ConflictError';
 
 export class TMSController {
 
@@ -28,18 +29,23 @@ export class TMSController {
         }
     }
 
-    public async addTenantUsers(req:Request,res:Response) {
+    public async addTenantUser(req:Request,res:Response) {
         try {
-            const savedUsers = await this.tmsService.addTenantUsers(req)
-            res.status(201).send(savedUsers)
+            const response = await this.tmsService.addTenantUser(req)
+            res.status(201).send(response)
         }
         catch(error) {
             console.log(error)
             if (error instanceof NotFoundError) {
-                this.errorHandler.generalError(res,"Error occurred during tenant creation", error.message, error.statusCode, "Not Found")
-            } 
-                this.errorHandler.generalError(res,"Error occurred during tenant creation", error.message, 500, "Internal Server Error")
+                this.errorHandler.generalError(res,"Error occurred adding user to the tenant", error.message, error.statusCode, "Not Found")
             }
+            else if (error instanceof ConflictError) {
+                this.errorHandler.generalError(res,"Error occurred adding user to the tenant", error.message, error.statusCode, "Conflict")
+            } 
+            else {    
+                this.errorHandler.generalError(res,"Error occurred adding user to the tenant", error.message, 500, "Internal Server Error")
+            }        
+        }
         }
 
     public async getTenantsForUser(req:Request,res:Response) {

@@ -9,10 +9,12 @@ export class TenantUser {
     @PrimaryGeneratedColumn('uuid')
     id:string
 
-    @ManyToOne(() => SSOUser)
+    @Index()
+    @ManyToOne(() => SSOUser,{eager:true, cascade:['insert']})
     @JoinColumn({ name: 'sso_id' })
     ssoUser: SSOUser
 
+    @Index()
     @ManyToOne(() => Tenant, (tenant) => tenant.users, { onDelete: 'CASCADE' })
     @JoinColumn({ name: 'tenant_id' })
     tenant: Tenant
