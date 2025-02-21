@@ -55,5 +55,14 @@ export class TMSService {
             }
         }
     }
+
+    public async assignUserRoles(req:Request) {
+        const userRoles = await this.tmsRepository.assignUserRoles(req)
+        return {
+            user: {
+                userRoles
+            }
+        }
+    }
     
 }

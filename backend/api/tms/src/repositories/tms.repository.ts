@@ -2,12 +2,14 @@ import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
 import { SSOUser } from '../entities/SSOUser'
 import { Role } from '../entities/Role'
-import { EntityManager } from 'typeorm'
+import { EntityManager, Not } from 'typeorm'
 import { In } from 'typeorm'
 import { Request} from 'express'
+import { TMSConstants } from '../common/tms.constants'
 import { TenantUserRole } from '../entities/TenantUserRole'
 import { NotFoundError } from '../errors/NotFoundError'
 import { ConflictError } from '../errors/ConflictError'
+import { ro } from 'date-fns/locale'
 
 export class TMSRepository {
 
@@ -52,7 +54,8 @@ export class TMSRepository {
                     await transactionEntityManager.save(tenantUserRole)
                 }
             }
-            response = savedTenantUser.ssoUser          
+            delete savedTenantUser.tenant
+            response = savedTenantUser
         }
         
         catch(error) {
@@ -104,6 +107,66 @@ export class TMSRepository {
         return response
     }
 
+    public async assignUserRoles(req:Request) {
+        let response = {}
+        await this.manager.transaction(async(transactionEntityManager) => {
+            try {
+                const { tenantId, tenantUserId, roleId } = req.params;
+                const tenantWithUsersAndRoles = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
+                if(tenantWithUsersAndRoles) {
+                    const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
+                        (user) => user.id = tenantUserId
+                    )
+                    console.log(matchingTenantUser.roles)
+
+                    const matchedRole = matchingTenantUser.roles?.some((rl) => rl.role?.id === roleId)
+
+                    if(matchedRole) {
+                        throw new ConflictError("User already mapped to this role for this tenant")
+                    }
+
+                    const matchingRole:Role = tenantWithUsersAndRoles.roles.find(
+                        (role:Role) => role.id = roleId
+                    )
+
+                    const tenantUserRole:TenantUserRole = new TenantUserRole()
+                    tenantUserRole.tenantUser = matchingTenantUser
+                    tenantUserRole.role = matchingRole
+
+                    const savedTenantUserRole = await transactionEntityManager.save(tenantUserRole)
+
+                    response = savedTenantUserRole
+
+                    }
+
+                    else {
+                        throw new NotFoundError("Tenant: " + tenantId + ",  Users: " + tenantUserId +  " and / or roles: " + roleId +  " not found")
+                    }
+
+                }
+                catch(error) {
+                    console.error('Assign role to user transaction failure - rolling back inserts ',error)
+                    throw error
+                }
+           
+        });
+        return response
+    }
+
+    public async getTenantsUsersAndRoles(tenantId:string,tenantUserId:string,roleId:string) {
+        const tenant = await this.manager
+            .createQueryBuilder(Tenant,"tenant")
+            .leftJoinAndSelect("tenant.users", "tenantUser")
+            .leftJoinAndSelect("tenantUser.roles","turoles")
+            .leftJoinAndSelect("turoles.role","role")
+            .leftJoinAndSelect("tenant.roles", "roles")
+            .where("tenant.id = :tenantId", { tenantId })
+            .andWhere("tenantUser.id = :tenantUserId", { tenantUserId })
+            .andWhere("roles.id = :roleId",{roleId})
+            .getOne();
+        return tenant
+    }
+
     public async checkIfTenantExists(tenantId:string) {
         const tenantExists = await this.manager
             .createQueryBuilder()
@@ -124,15 +187,15 @@ export class TMSRepository {
 
     public async getUsersForTenant(tenantId:string) {
         const users = await this.manager
-            .createQueryBuilder(SSOUser, "su")
-            .innerJoin(TenantUser, "tu", "tu.sso_id = su.id")
+            .createQueryBuilder(TenantUser, "tu")
+            .innerJoinAndSelect("tu.ssoUser", "su", "tu.sso_id = su.id")            
             .where("tu.tenant_id = :tenantId", { tenantId })
-            .getMany();
+            .getMany();       
         return users
     }
 
     public async getTenantIfUserDoesNotExistForTenant(ssoUserId:string, tenantId:string) {
-        const tenantWithoutUser = await this.manager
+        const tenant = await this.manager
         .createQueryBuilder(Tenant, "t")
         .where("t.id = :tenantId", { tenantId })
         .andWhere(qb => {
@@ -146,7 +209,7 @@ export class TMSRepository {
             return `NOT EXISTS (${subQuery})`;
         })
         .getOne();
-        return tenantWithoutUser
+        return tenant
     }
 
     public async saveRoles(roles:Role []) {
@@ -155,16 +218,12 @@ export class TMSRepository {
     }
 
     public async findRoles(roleNames:string[],tenantId:string) {
-
         const whereCondition: any = { name: In(roleNames) };
-
         if (tenantId) {
             whereCondition["tenant"] = { id: tenantId }
-        }
-        
+        }      
         const roles:Role [] = await this.manager.find(Role, { where: whereCondition });
         return roles ?? []
-
     }
 
     private async setSSOUser(ssoUserId:string, firstName:string, lastName:string, displayName:string,userName:string, email:string) {
@@ -196,8 +255,8 @@ export class TMSRepository {
             tenant.users = [tenantUser]
 
             const savedTenant = await transactionEntityManager.save(tenant)
-        
-            const globalTenantRoles = ["TMS.TENANT_ADMIN","TMS.TENANT_USER"]
+                  
+            const globalTenantRoles = [TMSConstants.TENANT_ADMIN, TMSConstants.TENANT_USER]
         
             const roles:Role[] = await this.findRoles(globalTenantRoles,null)
 
@@ -208,7 +267,7 @@ export class TMSRepository {
                 for(const role of globalTenantRoles) {
                     const tempRole:Role = new Role()
                     tempRole.name = role
-                    tempRole.description = (role === "TMS.TENANT_ADMIN" ? "Tenant Administrator Role" : "Tenant User Role" )
+                    tempRole.description = (role === TMSConstants.TENANT_ADMIN ? "Tenant Administrator Role" : "Tenant User Role" )
                     newRoles.push(tempRole)          
                 }
                 savedRoles = await transactionEntityManager.save(newRoles)
