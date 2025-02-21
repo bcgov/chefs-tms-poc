@@ -105,7 +105,6 @@ export class TMSRepository {
             tenantUser.ssoUser = ssoUser
     
             const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
-            console.log(savedTenantUser)
     
             if(req.body.user?.role?.id) {
                 const roleId = req.body.user.role.id;
@@ -249,7 +248,6 @@ export class TMSRepository {
             .from(Tenant, "t")
             .where("t.id = :tenantId", { tenantId })
             .getExists();
-            console.log(tenantExists)
         return tenantExists
     }
 
