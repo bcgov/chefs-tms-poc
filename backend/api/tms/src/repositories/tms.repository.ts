@@ -31,7 +31,7 @@ export class TMSRepository {
             tenant.name = req.body.name
             tenant.users = [tenantUser]
 
-            const savedTenant = await transactionEntityManager.save(tenant)
+            const savedTenant:Tenant = await transactionEntityManager.save(tenant)
                   
             const globalTenantRoles = [TMSConstants.TENANT_ADMIN, TMSConstants.TENANT_USER]
         
@@ -104,7 +104,7 @@ export class TMSRepository {
                 user.userName,user.email)       
             tenantUser.ssoUser = ssoUser
     
-            const savedTenantUser = await transactionEntityManager.save(tenantUser)
+            const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
             console.log(savedTenantUser)
     
             if(req.body.user?.role?.id) {
@@ -134,11 +134,8 @@ export class TMSRepository {
     public async createRoles(req:Request) {
         let response = {}
         await this.manager.transaction(async(transactionEntityManager) => {
-
             try {
-
                 const tenantId:string = req.params.id
-
                 const requestRole = req.body.role
 
                 const tenant:Tenant = await transactionEntityManager.findOne(Tenant,{where: {id:tenantId}})
@@ -175,12 +172,12 @@ export class TMSRepository {
         await this.manager.transaction(async(transactionEntityManager) => {
             try {
                 const { tenantId, tenantUserId, roleId } = req.params;
-                const tenantWithUsersAndRoles = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
+                const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
                 if(tenantWithUsersAndRoles) {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
                         (user) => user.id = tenantUserId
                     )
-                    const matchedRole = matchingTenantUser.roles?.some((rl) => rl.role?.id === roleId)
+                    const matchedRole:boolean = matchingTenantUser.roles?.some((rl) => rl.role?.id === roleId)
 
                     if(matchedRole) {
                        throw new ConflictError("User already mapped to this role for this tenant")
@@ -199,9 +196,9 @@ export class TMSRepository {
                     delete savedTenantUserRole.tenantUser.roles
 
                     response =  {
-                        user:savedTenantUserRole.tenantUser,
+                        user: savedTenantUserRole.tenantUser,
                         role: savedTenantUserRole.role,
-                        id:savedTenantUserRole.id,
+                        id: savedTenantUserRole.id,
                         createdDateTime: savedTenantUserRole.createdDateTime,
                         UpdateDateColumn: savedTenantUserRole.updatedDateTime
                     }
