@@ -98,14 +98,30 @@ export class TMSController {
         catch(error) {
             console.log(error)
             if (error instanceof NotFoundError) {
-                this.errorHandler.generalError(res,"Error occurred creating role", error.message, error.statusCode, "Not Found")
+                this.errorHandler.generalError(res,"Error occurred assigning user role", error.message, error.statusCode, "Not Found")
             }
             else if (error instanceof ConflictError) {
-                this.errorHandler.generalError(res,"Error occurred creating role", error.message, error.statusCode, "Conflict")
+                this.errorHandler.generalError(res,"Error occurred assigning user role", error.message, error.statusCode, "Conflict")
             } 
             else {    
-                this.errorHandler.generalError(res,"Error occurred creating role", error.message, 500, "Internal Server Error")
+                this.errorHandler.generalError(res,"Error occurred assigning user role", error.message, 500, "Internal Server Error")
             }        
+        }
+    }
+
+    public async getTenantRoles(req:Request, res:Response) {
+        try {
+            const roles = await this.tmsService.getTenantRoles(req)
+            return res.status(200).send(roles)
+        }
+        catch(error) {
+            console.log(error)
+            if (error instanceof NotFoundError) {
+                this.errorHandler.generalError(res,"Error occurred getting tenant roles", error.message, error.statusCode, "Not Found")
+            }
+            else {    
+                this.errorHandler.generalError(res,"Error occurred getting tenant roles", error.message, 500, "Internal Server Error")
+            } 
         }
     }
 

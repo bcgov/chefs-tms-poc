@@ -63,5 +63,14 @@ export class TMSService {
            data
         }
     }
+
+    public async getTenantRoles(req:Request) {
+        const roles = await this.tmsRepository.getTenantRoles(req)
+        return { 
+            data : {
+                roles
+            }
+        }
+    }
     
 }

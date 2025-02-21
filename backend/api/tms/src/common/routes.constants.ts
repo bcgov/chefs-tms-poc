@@ -6,4 +6,5 @@ export class RoutesConstants {
     public static GET_TENANT_USERS = '/v1/tenants/:id/users'
     public static CREATE_TENANT_ROLES = '/v1/tenants/:id/roles'
     public static ASSIGN_USER_ROLES = '/v1/tenants/:tenantId/users/:tenantUserId/roles/:roleId'
+    public static GET_TENANT_ROLES = '/v1/tenants/:id/roles'
   }
