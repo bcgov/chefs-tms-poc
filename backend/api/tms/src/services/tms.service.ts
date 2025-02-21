@@ -5,6 +5,7 @@ import { Tenant } from '../entities/Tenant';
 import { TenantUser } from '../entities/TenantUser';
 import { SSOUser } from '../entities/SSOUser';
 import { NotFoundError } from '../errors/NotFoundError';
+import { TenantUserRole } from '../entities/TenantUserRole';
 
 export class TMSService {
 
@@ -57,11 +58,9 @@ export class TMSService {
     }
 
     public async assignUserRoles(req:Request) {
-        const userRoles = await this.tmsRepository.assignUserRoles(req)
+        const data = await this.tmsRepository.assignUserRoles(req)
         return {
-            user: {
-                userRoles
-            }
+           data
         }
     }
     

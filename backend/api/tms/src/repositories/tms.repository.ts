@@ -2,7 +2,7 @@ import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
 import { SSOUser } from '../entities/SSOUser'
 import { Role } from '../entities/Role'
-import { EntityManager, Not } from 'typeorm'
+import { EntityManager, Not, UpdateDateColumn } from 'typeorm'
 import { In } from 'typeorm'
 import { Request} from 'express'
 import { TMSConstants } from '../common/tms.constants'
@@ -117,12 +117,10 @@ export class TMSRepository {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
                         (user) => user.id = tenantUserId
                     )
-                    console.log(matchingTenantUser.roles)
-
                     const matchedRole = matchingTenantUser.roles?.some((rl) => rl.role?.id === roleId)
 
                     if(matchedRole) {
-                        throw new ConflictError("User already mapped to this role for this tenant")
+                       throw new ConflictError("User already mapped to this role for this tenant")
                     }
 
                     const matchingRole:Role = tenantWithUsersAndRoles.roles.find(
@@ -133,12 +131,19 @@ export class TMSRepository {
                     tenantUserRole.tenantUser = matchingTenantUser
                     tenantUserRole.role = matchingRole
 
-                    const savedTenantUserRole = await transactionEntityManager.save(tenantUserRole)
+                    const savedTenantUserRole:TenantUserRole = await transactionEntityManager.save(tenantUserRole)
 
-                    response = savedTenantUserRole
+                    delete savedTenantUserRole.tenantUser.roles
 
+                    response =  {
+                        user:savedTenantUserRole.tenantUser,
+                        role: savedTenantUserRole.role,
+                        id:savedTenantUserRole.id,
+                        createdDateTime: savedTenantUserRole.createdDateTime,
+                        UpdateDateColumn: savedTenantUserRole.updatedDateTime
                     }
 
+                }
                     else {
                         throw new NotFoundError("Tenant: " + tenantId + ",  Users: " + tenantUserId +  " and / or roles: " + roleId +  " not found")
                     }
