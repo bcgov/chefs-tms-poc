@@ -2,7 +2,7 @@ import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
 import { SSOUser } from '../entities/SSOUser'
 import { Role } from '../entities/Role'
-import { EntityManager, Not } from 'typeorm'
+import { EntityManager } from 'typeorm'
 import { In } from 'typeorm'
 import { Request} from 'express'
 import { TMSConstants } from '../common/tms.constants'
@@ -321,11 +321,6 @@ export class TMSRepository {
         })
         .getOne();
         return tenant
-    }
-
-    public async saveRoles(roles:Role []) {
-        const savedRoles = await this.manager.save(roles)
-        return savedRoles
     }
 
     public async findRoles(roleNames:string[],tenantId:string) {
