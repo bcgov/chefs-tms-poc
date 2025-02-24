@@ -141,4 +141,20 @@ export class TMSController {
         }
     }
 
+    public async unassignUserRoles(req:Request,res:Response) {
+        try {
+            await this.tmsService.unassignUserRoles(req)
+            return res.status(204).send()
+        }
+        catch(error) {
+            console.log(error)
+            if (error instanceof NotFoundError) {
+                this.errorHandler.generalError(res,"Error occurred unassigning user role", error.message, error.statusCode, "Not Found")
+            }
+            else {    
+                this.errorHandler.generalError(res,"Error occurred unassigning user role", error.message, 500, "Internal Server Error")
+            } 
+        }
+    }
+
 }

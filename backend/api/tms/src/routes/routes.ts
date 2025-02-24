@@ -18,5 +18,6 @@ export class Routes {
         app.route(RoutesConstants.ASSIGN_USER_ROLES).put((req:Request,res:Response) => this.tmsController.assignUserRoles(req,res))
         app.route(RoutesConstants.GET_TENANT_ROLES).get((req:Request,res:Response) => this.tmsController.getTenantRoles(req,res))
         app.route(RoutesConstants.GET_USER_ROLES).get((req:Request,res:Response) => this.tmsController.getUserRoles(req,res))
+        app.route(RoutesConstants.UNASSIGN_USER_ROLES).delete((req:Request,res:Response) => this.tmsController.unassignUserRoles(req,res))
     }
 }

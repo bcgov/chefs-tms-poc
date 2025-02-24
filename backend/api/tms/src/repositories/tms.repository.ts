@@ -104,7 +104,7 @@ export class TMSRepository {
             tenantUser.ssoUser = ssoUser
     
             const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
-            
+
             delete savedTenantUser.tenant
             response = savedTenantUser
         }
@@ -233,6 +233,37 @@ export class TMSRepository {
             const roles:Role [] = await this.getRolesForUser(tenantUserId)
             return roles
         }
+    }
+
+    public async unassignUserRoles(req:Request) {
+        const tenantId = req.params.id
+        const tenantUserId = req.params.tenantUserId
+        const roleId = req.params.roleId
+        const assignedTenantUserRole:TenantUserRole = await this.getTenantUserRole(tenantId,tenantUserId,roleId)
+        console.log(tenantId, tenantUserId, roleId)
+        console.log(assignedTenantUserRole)
+        
+        if(!assignedTenantUserRole) {
+            throw new NotFoundError("Tenant: " + tenantId + ",  Users: " + tenantUserId +  " and / or roles: " + roleId +  " not found")
+        } 
+        await this.manager.delete(TenantUserRole, {
+            tenantUser: { id: tenantUserId },
+            role: { id: roleId }
+          });
+    }
+
+    public async getTenantUserRole(tenantId:string,tenantUserId:string,roleId:string)  {
+        const tenantUserRole:TenantUserRole = await this.manager
+            .createQueryBuilder(TenantUserRole, "tenantUserRole")
+            .innerJoin("tenantUserRole.tenantUser", "tenantUser") 
+            .innerJoin("tenantUserRole.role", "role") 
+            .innerJoin("tenantUser.tenant", "tenant") 
+            .where("tenant.id = :tenantId", { tenantId })
+            .andWhere("tenantUser.id = :tenantUserId", { tenantUserId }) 
+            .andWhere("role.id = :roleId", { roleId }) 
+        //    .andWhere("role.tenant_id = :tenantId", { tenantId }) 
+            .getOne();
+        return tenantUserRole
     }
 
     public async checkIfTenantUserExistsForTenant(tenantId:string,tenantUserId:string) {
