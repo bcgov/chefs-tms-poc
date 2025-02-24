@@ -172,7 +172,6 @@ export class TMSRepository {
                     }
 
                     const tenantRoles:Role[] = await this.findTenantRoles(tenantId)
-                    console.log(tenantRoles)
                     const matchingRole:Role = tenantRoles.find(
                         (role) => role.id === roleId
                     )
@@ -239,9 +238,7 @@ export class TMSRepository {
         const tenantId = req.params.id
         const tenantUserId = req.params.tenantUserId
         const roleId = req.params.roleId
-        const assignedTenantUserRole:TenantUserRole = await this.getTenantUserRole(tenantId,tenantUserId,roleId)
-        console.log(tenantId, tenantUserId, roleId)
-        console.log(assignedTenantUserRole)
+        const assignedTenantUserRole:TenantUserRole = await this.getTenantUserRole(tenantId,tenantUserId,roleId)       
         
         if(!assignedTenantUserRole) {
             throw new NotFoundError("Tenant: " + tenantId + ",  Users: " + tenantUserId +  " and / or roles: " + roleId +  " not found")
