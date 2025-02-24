@@ -192,9 +192,9 @@ export class TMSRepository {
                     response =  {
                         user: savedTenantUserRole.tenantUser,
                         role: savedTenantUserRole.role,
-                        id: savedTenantUserRole.id,
-                        createdDateTime: savedTenantUserRole.createdDateTime,
-                        UpdateDateColumn: savedTenantUserRole.updatedDateTime
+                        // id: savedTenantUserRole.id,
+                        // createdDateTime: savedTenantUserRole.createdDateTime,
+                        // UpdateDateColumn: savedTenantUserRole.updatedDateTime
                     }
 
                 }
@@ -289,6 +289,7 @@ export class TMSRepository {
         const tenant = await this.manager
             .createQueryBuilder(Tenant,"tenant")
             .leftJoinAndSelect("tenant.users", "tenantUser")
+            .leftJoinAndSelect("tenantUser.ssoUser","ssoUser")
             .leftJoinAndSelect("tenantUser.roles","turoles")
             .leftJoinAndSelect("turoles.role","role")
             .leftJoinAndSelect("tenant.roles", "roles")
