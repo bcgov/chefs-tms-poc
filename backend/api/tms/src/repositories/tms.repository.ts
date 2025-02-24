@@ -2,7 +2,7 @@ import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
 import { SSOUser } from '../entities/SSOUser'
 import { Role } from '../entities/Role'
-import { EntityManager } from 'typeorm'
+import { EntityManager, Not } from 'typeorm'
 import { In } from 'typeorm'
 import { Request} from 'express'
 import { TMSConstants } from '../common/tms.constants'
@@ -181,9 +181,15 @@ export class TMSRepository {
                        throw new ConflictError("User already mapped to this role for this tenant")
                     }
 
-                    const matchingRole:Role = tenantWithUsersAndRoles.roles.find(
-                        (role:Role) => role.id = roleId
+                    const tenantRoles:Role[] = await this.findTenantRoles(tenantId)
+                    console.log(tenantRoles)
+                    const matchingRole:Role = tenantRoles.find(
+                        (role) => role.id === roleId
                     )
+
+                    if(!matchingRole) {
+                        throw new NotFoundError("Role: "+roleId+ " not found for tenant: "+tenantId)
+                    }
 
                     const tenantUserRole:TenantUserRole = new TenantUserRole()
                     tenantUserRole.tenantUser = matchingTenantUser
@@ -267,7 +273,7 @@ export class TMSRepository {
             .leftJoinAndSelect("tenant.roles", "roles")
             .where("tenant.id = :tenantId", { tenantId })
             .andWhere("tenantUser.id = :tenantUserId", { tenantUserId })
-            .andWhere("roles.id = :roleId",{roleId})
+      //    .andWhere("roles.id = :roleId or roles.tenant is null",{roleId})
             .getOne();
         return tenant
     }
