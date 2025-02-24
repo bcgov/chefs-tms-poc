@@ -104,17 +104,7 @@ export class TMSRepository {
             tenantUser.ssoUser = ssoUser
     
             const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
-    
-            if(req.body.user?.role?.id) {
-                const roleId = req.body.user.role.id;
-                const role:Role = await transactionEntityManager.findOne(Role,{where: {id:roleId}})
-                if(role) {                
-                    const tenantUserRole:TenantUserRole = new TenantUserRole()
-                    tenantUserRole.role = role
-                    tenantUserRole.tenantUser = savedTenantUser
-                    await transactionEntityManager.save(tenantUserRole)
-                }
-            }
+            
             delete savedTenantUser.tenant
             response = savedTenantUser
         }
