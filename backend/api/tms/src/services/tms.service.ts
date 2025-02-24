@@ -72,5 +72,14 @@ export class TMSService {
             }
         }
     }
+
+    public async getUserRoles(req:Request) {
+        const roles = await this.tmsRepository.getUserRoles(req)
+        return {
+            data: {
+                roles
+            }
+        }
+    }
     
 }

@@ -2,14 +2,13 @@ import { Tenant } from '../entities/Tenant'
 import { TenantUser } from '../entities/TenantUser'
 import { SSOUser } from '../entities/SSOUser'
 import { Role } from '../entities/Role'
-import { EntityManager, Not, UpdateDateColumn } from 'typeorm'
+import { EntityManager } from 'typeorm'
 import { In } from 'typeorm'
 import { Request} from 'express'
 import { TMSConstants } from '../common/tms.constants'
 import { TenantUserRole } from '../entities/TenantUserRole'
 import { NotFoundError } from '../errors/NotFoundError'
 import { ConflictError } from '../errors/ConflictError'
-import { ro } from 'date-fns/locale'
 
 export class TMSRepository {
 
@@ -226,6 +225,37 @@ export class TMSRepository {
             const roles:Role [] = await this.findTenantRoles(tenantId)
             return roles
         }  
+    }
+
+    public async getUserRoles(req:Request) {
+        const tenantId = req.params.id
+        const tenantUserId = req.params.tenantUserId
+        if(!await this.checkIfTenantUserExistsForTenant(tenantId,tenantUserId) ) {
+            throw new NotFoundError("Tenant or Tenant user not found: Tenant: "+tenantId+" Tenant User: "+tenantUserId)
+        }
+        else {
+            const roles:Role [] = await this.getRolesForUser(tenantUserId)
+            return roles
+        }
+    }
+
+    public async checkIfTenantUserExistsForTenant(tenantId:string,tenantUserId:string) {
+        const tenantUserExists = await this.manager
+            .createQueryBuilder(TenantUser,"tu")
+            .where("tu.id = :tenantUserId", { tenantUserId })
+            .andWhere("tu.tenant_id = :tenantId", { tenantId })
+            .getExists();
+        return tenantUserExists
+    }
+
+    public async getRolesForUser(tenantUserId:string) {
+        const roles = await this.manager
+            .createQueryBuilder(Role,"role")
+            .innerJoin("TenantUserRole", "tur", "tur.role_id = role.id")
+            .innerJoin("TenantUser", "tu", "tu.id = tur.tenant_user_id")
+            .where("tu.id = :tenantUserId", { tenantUserId })
+            .getMany();
+        return roles
     }
 
     public async getTenantsUsersAndRoles(tenantId:string,tenantUserId:string,roleId:string) {
