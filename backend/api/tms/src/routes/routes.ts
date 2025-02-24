@@ -13,7 +13,7 @@ export class Routes {
     public routes (app:any) {
         app.route(RoutesConstants.HEALTH).get((req:Request, res:Response) => this.tmsController.health(req, res))
         app.route(RoutesConstants.CREATE_TENANTS).post(validate(validator.createTenant,{},{}),(req:Request,res:Response) => this.tmsController.createTenant(req,res))
-        app.route(RoutesConstants.ADD_TENANT_USERS).post((req:Request,res:Response) => this.tmsController.addTenantUser(req,res))
+        app.route(RoutesConstants.ADD_TENANT_USERS).post(validate(validator.addTenantUser,{},{}),(req:Request,res:Response) => this.tmsController.addTenantUser(req,res))
         app.route(RoutesConstants.GET_USER_TENANTS).get((req:Request,res:Response) => this.tmsController.getTenantsForUser(req,res))
         app.route(RoutesConstants.GET_TENANT_USERS).get((req:Request,res:Response) => this.tmsController.getUsersForTenant(req,res))
         app.route(RoutesConstants.CREATE_TENANT_ROLES).post((req:Request,res:Response) => this.tmsController.createRoles(req,res))
