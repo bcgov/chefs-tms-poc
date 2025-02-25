@@ -55,6 +55,35 @@ export default {
                 description: Joi.string().min(1).max(255).required()
             }).min(1)
         }).options({abortEarly:false,convert:false})
+    },
+
+    assignUserRoles: {
+        params: Joi.object({
+            tenantId: Joi.string().guid().required(),
+            tenantUserId: Joi.string().guid().required(),
+            roleId: Joi.string().guid().required()
+        })
+    },
+
+    getTenantRoles: {
+        params: Joi.object({
+            id: Joi.string().guid().required()
+        })
+    },
+
+    getUserRoles: {
+        params: Joi.object({
+            id: Joi.string().guid().required(),
+            tenantUserId: Joi.string().guid().required()
+        })
+    },
+
+    unassignUserRoles: {
+        params: Joi.object({
+            id: Joi.string().guid().required(),
+            tenantUserId: Joi.string().guid().required(),
+            roleId: Joi.string().guid().required()
+        })
     }
 
 }
