@@ -24,7 +24,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TenantResponse'
+                $ref: '#/components/schemas/CreateTenantResponse'
         '400':
           description: Invalid input (e.g., missing required fields, exceeding length limits) - general schema validation failure
           content:
