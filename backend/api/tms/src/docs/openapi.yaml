@@ -4,11 +4,11 @@ info:
   description: API for managing tenants in the Tenancy Management System
   version: 1.0.0
 servers:
-  - url: http://localhost:3000
-    description: Local Development Server
+  - url: http://localhost:4144
+    description: Local dev server
 
 paths:
-  /tenants:
+  /v1/tenants:
     post:
       summary: Create a new tenant
       description: Creates a new tenant in the system.
