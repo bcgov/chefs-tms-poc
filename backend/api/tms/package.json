@@ -45,10 +45,11 @@
         "pg": "^8.6.0",
         "reflect-metadata": "^0.1.10",
         "response-time": "^2.3.2",
-        "swagger-ui-express": "^4.1.6",
+        "swagger-ui-express": "^4.6.3",
         "typeorm": "^0.3.20",
         "winston": "^3.3.3",
-        "winston-daily-rotate-file": "^4.5.5"
+        "winston-daily-rotate-file": "^4.5.5",
+        "yamljs": "^0.3.0"
     },
     "scripts": {
         "start": "ts-node --transpile-only src/index.ts",

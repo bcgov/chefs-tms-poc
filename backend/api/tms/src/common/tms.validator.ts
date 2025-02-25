@@ -4,7 +4,7 @@ export default {
 
     createTenant: {
         body: Joi.object({
-            name: Joi.string().min(1).max(20).required(),
+            name: Joi.string().min(1).max(30).required(),
             ministryName: Joi.string().min(1).max(100).required(),
             user: Joi.object().keys({
                 firstName: Joi.string().min(1).max(50).required(),
