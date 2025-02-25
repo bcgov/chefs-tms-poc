@@ -81,5 +81,9 @@ export class TMSService {
             }
         }
     }
+
+    public async unassignUserRoles(req:Request) {
+        await this.tmsRepository.unassignUserRoles(req)
+    }
     
 }

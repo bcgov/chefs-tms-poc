@@ -104,17 +104,7 @@ export class TMSRepository {
             tenantUser.ssoUser = ssoUser
     
             const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
-    
-            if(req.body.user?.role?.id) {
-                const roleId = req.body.user.role.id;
-                const role:Role = await transactionEntityManager.findOne(Role,{where: {id:roleId}})
-                if(role) {                
-                    const tenantUserRole:TenantUserRole = new TenantUserRole()
-                    tenantUserRole.role = role
-                    tenantUserRole.tenantUser = savedTenantUser
-                    await transactionEntityManager.save(tenantUserRole)
-                }
-            }
+
             delete savedTenantUser.tenant
             response = savedTenantUser
         }
@@ -182,7 +172,6 @@ export class TMSRepository {
                     }
 
                     const tenantRoles:Role[] = await this.findTenantRoles(tenantId)
-                    console.log(tenantRoles)
                     const matchingRole:Role = tenantRoles.find(
                         (role) => role.id === roleId
                     )
@@ -202,9 +191,9 @@ export class TMSRepository {
                     response =  {
                         user: savedTenantUserRole.tenantUser,
                         role: savedTenantUserRole.role,
-                        id: savedTenantUserRole.id,
-                        createdDateTime: savedTenantUserRole.createdDateTime,
-                        UpdateDateColumn: savedTenantUserRole.updatedDateTime
+                        // id: savedTenantUserRole.id,
+                        // createdDateTime: savedTenantUserRole.createdDateTime,
+                        // UpdateDateColumn: savedTenantUserRole.updatedDateTime
                     }
 
                 }
@@ -245,6 +234,35 @@ export class TMSRepository {
         }
     }
 
+    public async unassignUserRoles(req:Request) {
+        const tenantId = req.params.id
+        const tenantUserId = req.params.tenantUserId
+        const roleId = req.params.roleId
+        const assignedTenantUserRole:TenantUserRole = await this.getTenantUserRole(tenantId,tenantUserId,roleId)       
+        
+        if(!assignedTenantUserRole) {
+            throw new NotFoundError("Tenant: " + tenantId + ",  Users: " + tenantUserId +  " and / or roles: " + roleId +  " not found")
+        } 
+        await this.manager.delete(TenantUserRole, {
+            tenantUser: { id: tenantUserId },
+            role: { id: roleId }
+          });
+    }
+
+    public async getTenantUserRole(tenantId:string,tenantUserId:string,roleId:string)  {
+        const tenantUserRole:TenantUserRole = await this.manager
+            .createQueryBuilder(TenantUserRole, "tenantUserRole")
+            .innerJoin("tenantUserRole.tenantUser", "tenantUser") 
+            .innerJoin("tenantUserRole.role", "role") 
+            .innerJoin("tenantUser.tenant", "tenant") 
+            .where("tenant.id = :tenantId", { tenantId })
+            .andWhere("tenantUser.id = :tenantUserId", { tenantUserId }) 
+            .andWhere("role.id = :roleId", { roleId }) 
+        //    .andWhere("role.tenant_id = :tenantId", { tenantId }) 
+            .getOne();
+        return tenantUserRole
+    }
+
     public async checkIfTenantUserExistsForTenant(tenantId:string,tenantUserId:string) {
         const tenantUserExists = await this.manager
             .createQueryBuilder(TenantUser,"tu")
@@ -268,6 +286,7 @@ export class TMSRepository {
         const tenant = await this.manager
             .createQueryBuilder(Tenant,"tenant")
             .leftJoinAndSelect("tenant.users", "tenantUser")
+            .leftJoinAndSelect("tenantUser.ssoUser","ssoUser")
             .leftJoinAndSelect("tenantUser.roles","turoles")
             .leftJoinAndSelect("turoles.role","role")
             .leftJoinAndSelect("tenant.roles", "roles")

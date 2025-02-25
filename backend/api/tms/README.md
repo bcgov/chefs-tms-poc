@@ -2,7 +2,7 @@ Tenant Management System API
 
 There are two ways to run this API locally.
 
-1. Use docker-compose (ensure docker-compose is installed and available)
+1. Use docker-compose (ensure docker-compose is installed and available) - refer to the end of the file for docker-compose debugging steps
 
     cd <CLONE_FOLDER>/api/tms
    
@@ -32,3 +32,13 @@ There are two ways to run this API locally.
     npm run dev
 
     Verify API is up via: http://localhost:4144/v1/health
+
+4. DEBUGGING STEPS - docker-compose:
+
+    To clear the existing docker-compose images and configurations, run the following commands in sequence:
+
+    1. docker compose down --volumes --remove-orphans
+    2. docker compose down --rmi all
+    3. docker volume prune -f
+
+    4. docker compose up --build
