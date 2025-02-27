@@ -84,6 +84,15 @@ export default {
             tenantUserId: Joi.string().guid().required(),
             roleId: Joi.string().guid().required()
         })
-    }
+    },
+
+    searchBCGOVSSOUsers: {
+        query: Joi.object({
+            firstName: Joi.string(),
+            lastName: Joi.string(),
+            email: Joi.string(),
+            guid: Joi.string()
+        }).or('firstName', 'lastName', 'email', 'guid')
+    }    
 
 }

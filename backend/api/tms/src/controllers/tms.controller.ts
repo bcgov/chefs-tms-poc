@@ -21,6 +21,7 @@ export class TMSController {
     public async createTenant(req:Request, res:Response) {
     try {
         const tenantResponse = await this.tmsService.createTenant(req)
+        console.log(await tenantResponse)
         res.status(201).send(tenantResponse);
     } 
     catch(error) {
@@ -155,6 +156,16 @@ export class TMSController {
                 this.errorHandler.generalError(res,"Error occurred unassigning user role", error.message, 500, "Internal Server Error")
             } 
         }
+    }
+
+    public async searchBCGOVSSOUsers(req:Request,res:Response) {
+        try {
+            const users = await this.tmsService.searchBCGOVSSOUsers(req)
+            return res.status(200).send(users)
+        }
+        catch(error) {            
+                this.errorHandler.generalError(res,"Error occurred searching SSO users", error.message, 500, "Internal Server Error")
+        }   
     }
 
 }

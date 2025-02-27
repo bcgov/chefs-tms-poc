@@ -1,11 +1,8 @@
 import { Request, Response } from 'express'
 import {TMSRepository} from '../repositories/tms.repository'
 import { connection } from '../common/db.connection'
-import { Tenant } from '../entities/Tenant';
-import { TenantUser } from '../entities/TenantUser';
-import { SSOUser } from '../entities/SSOUser';
-import { NotFoundError } from '../errors/NotFoundError';
-import { TenantUserRole } from '../entities/TenantUserRole';
+import { URLSearchParams } from 'url'
+import axios from 'axios';
 
 export class TMSService {
 
@@ -85,5 +82,37 @@ export class TMSService {
     public async unassignUserRoles(req:Request) {
         await this.tmsRepository.unassignUserRoles(req)
     }
-    
+
+    public async searchBCGOVSSOUsers(req:Request) {
+        try {
+            const token:string = await this.getToken()
+            const queryParams = req.query;
+            const response = await axios.get(process.env.BCGOV_SSO_API_URL, {
+                headers: { Authorization: `Bearer ${token}` },
+                params: queryParams,
+            });       
+            return await response.data
+        }
+        catch(error) {
+            console.log(error)
+            throw new Error("Error invoking BC GOV SSO API. "+error)
+        }
+    }
+
+    private async getToken() {
+        try {
+            const response = await axios.post(
+                process.env.BCGOV_TOKEN_URL,
+                new URLSearchParams({
+                    client_id: process.env.BC_GOV_SSO_CLIENT_ID,
+                    client_secret: process.env.BCGOV_SSO_CLIENT_SECRET,
+                    grant_type: "client_credentials",
+                }),
+                { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
+            );
+            return response.data.access_token;
+        } catch (error) {
+            throw new Error("Failed to obtain access token: "+error)
+        }
+    }
 }
