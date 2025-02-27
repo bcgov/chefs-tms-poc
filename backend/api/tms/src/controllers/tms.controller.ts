@@ -21,7 +21,6 @@ export class TMSController {
     public async createTenant(req:Request, res:Response) {
     try {
         const tenantResponse = await this.tmsService.createTenant(req)
-        console.log(await tenantResponse)
         res.status(201).send(tenantResponse);
     } 
     catch(error) {
