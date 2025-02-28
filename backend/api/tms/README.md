@@ -21,7 +21,7 @@ There are two ways to run this API locally.
 
     Start a postgres container - command with sample credentials below.
 
-    docker run -d --name some-postgres -p 5432:5432 -e POSTGRES_USER=myuser -e POSTGRES_PASSWORD=mypassword -e POSTGRES_DB=mydb postgres
+    docker run -d --name tms-postgres -p 5432:5432 -e POSTGRES_USER=tms -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=tmsdb postgres
 
     Update .env to the correct database parameters as above
     Update .env to include the correct SSO api credentials
