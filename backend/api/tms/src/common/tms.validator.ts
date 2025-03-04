@@ -93,6 +93,13 @@ export default {
             email: Joi.string(),
             guid: Joi.string()
         }).or('firstName', 'lastName', 'email', 'guid')
-    }    
+    },
+    
+    getTenant: {
+        query: Joi.object({
+            expand: Joi.string().optional()
+            .pattern(/^(tenantUserRoles|roles)(,(tenantUserRoles|roles))?$/)
+        }).optional()
+    }
 
 }

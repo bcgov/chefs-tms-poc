@@ -99,6 +99,15 @@ export class TMSService {
         }
     }
 
+    public async getTenant(req:Request) {
+        const tenant = await this.tmsRepository.getTenant(req)
+        return {
+            data: {
+                tenant
+            }
+        }
+    }
+
     private async getToken() {
         try {
             const response = await axios.post(

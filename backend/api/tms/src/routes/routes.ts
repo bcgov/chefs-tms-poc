@@ -22,6 +22,7 @@ export class Routes {
         app.route(RoutesConstants.GET_USER_ROLES).get(validate(validator.getUserRoles,{},{}),(req:Request,res:Response) => this.tmsController.getUserRoles(req,res))
         app.route(RoutesConstants.UNASSIGN_USER_ROLES).delete(validate(validator.unassignUserRoles,{},{}),(req:Request,res:Response) => this.tmsController.unassignUserRoles(req,res))
         app.route(RoutesConstants.SEARCH_BC_GOV_IDIR_USERS).get(validate(validator.searchBCGOVSSOUsers,{},{}),(req:Request,res:Response) => this.tmsController.searchBCGOVSSOUsers(req,res))
+        app.route(RoutesConstants.GET_TENANT).get(validate(validator.getTenant,{},{}),(req:Request,res:Response) => this.tmsController.getTenant(req,res))
 
         app.use(function (error: Error, req: any, res: Response<any, Record<string, any>>, next: any) {
             console.log(error.message)
