@@ -46,9 +46,11 @@ export const getToken = () => keycloak.token;
 export const isLoggedIn = () => !!keycloak.token;
 export const getUser = () => {
   return {
-    idir_user_guid: keycloak.tokenParsed.idir_user_guid,
-    idir_username: keycloak.tokenParsed.idir_username,
+    firstName: keycloak.tokenParsed.given_name,
+    lastName: keycloak.tokenParsed.family_name,
+    displayName: keycloak.tokenParsed.display_name,
+    userName: keycloak.tokenParsed.idir_username,
+    ssoUserId: keycloak.tokenParsed.idir_user_guid,
     email: keycloak.tokenParsed.email,
-    name: keycloak.tokenParsed.name,
   };
 };

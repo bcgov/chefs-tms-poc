@@ -2,7 +2,8 @@
 import { ref, inject } from 'vue';
 import { useTenanciesStore } from '../stores/tenancies';
 import { getUser } from '../services/keycloak';
-import { ROLES } from '../constants';
+import { createTenancy } from '../services/tenantService';
+import { storeToRefs } from 'pinia';
 
 const props = defineProps({
   visible: Boolean
@@ -12,11 +13,12 @@ const emit = defineEmits(['close']);
 const tenanciesStore = useTenanciesStore();
 const alertService = inject('alertService');
 const username = ref('');
-const organizationName = ref('');
-const bcMinistries = ref('');
+const name = ref('');
+const ministryName = ref('');
 const formValid = ref(false);
+const { tenancies } = storeToRefs(tenanciesStore);
 
-username.value = getUser().idir_username;
+username.value = getUser().displayName;
 
 const rules = {
   required: value => !!value || 'Required'
@@ -61,18 +63,26 @@ const ministries = [
   "Water, Land and Resource Stewardship"
 ];
 
-const addTenancy = () => {
+const addTenancy = async () => {
   if (formValid.value) {
-    tenanciesStore.addTenancy(organizationName.value, bcMinistries.value, [{
-      idir_username: getUser().idir_username,
-      name: getUser().name,
-      email: getUser().email,
-      role: ROLES.TENANT_OWNER_ADMIN
-    }]);
-    organizationName.value = '';
-    bcMinistries.value = '';
-    alertService.addAlert('New tenancy created successfully', 'success');
-    emit('close');
+    try {
+      const response = await createTenancy({
+        name: name.value,
+        ministryName: ministryName.value,
+        user: {
+          ...getUser(),
+        },
+      });
+      name.value = '';
+      ministryName.value = '';
+      tenancies.value.push(response);
+      alertService.addAlert('New tenancy created successfully', 'success');
+    } catch (error) {
+      alertService.addAlert('Failed to create new tenancy', 'error');
+      console.error(error);
+    } finally {
+      emit('close');
+    }
   }
 };
 
@@ -97,7 +107,7 @@ const closeDialog = () => {
           <v-row>
             <v-col cols="12" md="6">
               <v-text-field
-                v-model="organizationName"
+                v-model="name"
                 label="Name of Tenancy"
                 :rules="[rules.required]"
                 required
@@ -105,7 +115,7 @@ const closeDialog = () => {
             </v-col>
             <v-col cols="12" md="6">
               <v-select
-                v-model="bcMinistries"
+                v-model="ministryName"
                 :items="ministries"
                 label="BC Ministries"
                 :rules="[rules.required]"
