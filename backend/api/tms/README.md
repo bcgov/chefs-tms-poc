@@ -4,8 +4,7 @@ There are two ways to run this API locally.
 
 1. Use docker-compose (ensure docker-compose is installed and available) - refer to the end of the file for docker-compose debugging steps
 
-    Update .env to point to the correct SSO api credentials
-    Update docker-compose.yaml to include the correct SSO api credentials
+    Update docker-compose.yaml to point to the correct SSO api credentials    
 
     cd <CLONE_FOLDER>/api/tms
    
@@ -23,7 +22,7 @@ There are two ways to run this API locally.
 
     docker run -d --name tms-postgres -p 5432:5432 -e POSTGRES_USER=tms -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_DB=tmsdb postgres
 
-    Update .env to the correct database parameters as above
+    Copy env.sample to env and update the .env to the correct database parameters as above
     Update .env to include the correct SSO api credentials
     
     cd <CLONE_FOLDER>/api/tms
