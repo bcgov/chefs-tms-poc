@@ -21,7 +21,7 @@ const handleLogout = () => {
     <template #append>
       <div v-if="isLoggedIn">
         <v-icon icon="mdi-account-outline" size="x-large"></v-icon>
-        <span>{{ userInfo?.idir_username }} | </span>
+        <span>{{ userInfo?.displayName }} | </span>
         <v-btn @click="handleLogout">Logout</v-btn>
       </div>
     </template>

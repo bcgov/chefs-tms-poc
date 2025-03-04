@@ -20,8 +20,8 @@ const closeDialog = () => {
   dialogVisible.value = false;
 };
 
-const goToManageTenancy = (organizationName) => {
-  router.push({ path: `/tenancies/${organizationName}` });
+const goToManageTenancy = (name) => {
+  router.push({ path: `/tenancies/${name}` });
 };
 
 const firstAdminUser = computed(() => {
@@ -69,8 +69,8 @@ fetchUserTenants();
         </v-col>
       </v-row>
       <v-row>
-        <v-col v-for="tenancy in tenancies" :key="tenancy.ministryName" cols="12" md="4">
-          <v-card @click="goToManageTenancy(tenancy.ministryName)">
+        <v-col v-for="tenancy in tenancies" :key="tenancy.id" cols="12" md="4">
+          <v-card @click="goToManageTenancy(tenancy.id)">
             <v-card-title>{{ tenancy.name }}</v-card-title>
             <v-card-subtitle>{{ tenancy.ministryName }}</v-card-subtitle>
             <v-card-text v-if="firstAdminUser != null">

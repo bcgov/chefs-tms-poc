@@ -3,80 +3,113 @@ import { ref, computed, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTenanciesStore } from '../stores/tenancies';
 import { ROLES } from '../constants';
-import ssoService from '../services/ssoService';
+import { searchIdirUsers } from '../services/userService';
+import { getTenantRoles, addTenantUsers } from '../services/tenantService';
+import { storeToRefs } from 'pinia';
 
-const breadcrumbs = computed(() => [
-    { title: 'Tenancies', disabled: false, href: '/tenancies', },
-    { title: route.params.id, disabled: false, href: `/tenancies/${route.params.id}`, },
-]);
 const route = useRoute();
 const router = useRouter();
 const tenanciesStore = useTenanciesStore();
 const alertService = inject('alertService');
-const tenancy = computed(() => tenanciesStore.tenancies.find(t => t.organizationName === route.params.id));
+const { tenancies } = storeToRefs(tenanciesStore);
+const tenancy = computed(() => tenancies.value.find(t => t.id === route.params.id));
 
+const breadcrumbs = computed(() => [
+    { title: 'Tenancies', disabled: false, href: '/tenancies', },
+    { title: tenancy.value.name, disabled: false, href: `/tenancies/${tenancy.value.id}`, },
+]);
+
+const loadingSearchResults = ref(false);
 const tab = ref(1);
-const searchOption = ref('name');
+const roles = ref([]);
+const searchOption = ref('firstName');
 const searchText = ref('');
 const searchResults = ref([]);
 const selectedUser = ref(null);
 const selectedRole = ref('');
-const mockData = [
-  { "firstName": "Carey", "lastName": "Mulligan", "email": "carey.mulligan@gov.bc.ca", "name": "Carey Mulligan", "idir_username": "CAREYMULLIGAN" },
-  { "firstName": "Cat", "lastName": "Mulligan", "email": "cat.mulligan@gov.bc.ca", "name": "Cat Mulligan", "idir_username": "CATMULLIGAN" },
-];
 
 const deleteDialogVisible = ref(false);
+
+const fetchTenantRoles = async () => {
+  try {
+    const response = await getTenantRoles(route.params.id);
+    roles.value = response;
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 const searchUsers = async () => {
   if (searchOption.value && searchText.value) {
     try {
+      loadingSearchResults.value = true;
       let params = {};
-      if (searchOption.value === 'name') {
-        const names = searchText.value.toLowerCase().split(' ');
-        const firstName = names[0] || '';
-        const lastName = names.slice(1).join(' ') || '';
-        params.firstName = firstName;
-        if (lastName.length >= 2) {
-          params.lastName = lastName;
-        }
+      if (searchOption.value === 'firstName') {
+        params.firstName = searchText.value.toLowerCase();
+      } if (searchOption.value === 'lastName') {
+        params.lastName = searchText.value.toLowerCase();
       } else if (searchOption.value === 'email') {
-        params.email = searchText.value().toLowerCase();
+        params.email = searchText.value.toLowerCase();
       }
-      console.log(params);
-      const response = await ssoService.get('https://api.loginproxy.gov.bc.ca/api/v1/dev/idir/users', {
-        params,
-      })
-      console.log(response);
-      searchResults.value = response.data.data;
+      const response = await searchIdirUsers(params);
+      searchResults.value = response.map(user => {
+        const displayName = user.attributes.display_name ? user.attributes.display_name[0] : user.attributes.displayName;
+        const ssoUserId = user.attributes.idir_user_guid ? user.attributes.idir_user_guid[0] : user.attributes.idir_userid;
+
+        if (!displayName || !ssoUserId) {
+          return null;
+        }
+
+        return {
+          firstName: user.firstName,
+          lastName: user.lastName,
+          displayName: displayName,
+          userName: user.username,
+          ssoUserId: ssoUserId,
+          email: user.email,
+        };
+      }).filter(user => user !== null);
     } catch (error) {
       console.log(error);
+    } finally {
+      loadingSearchResults.value = false;
     }
-    /* searchResults.value = mockData.filter(user =>
-      searchOption.value === 'name'
-        ? `${user.firstName} ${user.lastName}`.toLowerCase().includes(searchText.value.toLowerCase())
-        : user.email.toLowerCase().includes(searchText.value.toLowerCase())
-    ); */
   }
 };
 
-const addUserToTenancy = () => {
+const addUserToTenancy = async () => {
   if (tenancy.value && selectedUser.value) {
-    tenancy.value.users.push({
-      ...selectedUser.value[0],
-      role: selectedRole.value
-    });
-    searchResults.value = [];
-    selectedUser.value = null;
-    selectedRole.value = '';
+    try {
+      /* tenancy.value.users.push({
+        ...selectedUser.value[0],
+        role: selectedRole.value
+      }); */
+      let addTenantUserResponse = await addTenantUsers(tenancy.value.id, {
+        user: {
+          ...selectedUser.value[0],
+        }
+      });
+      if (addTenantUserResponse?.id) {
+
+      }
+      console.log(addTenantUserResponse);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      searchResults.value = [];
+      selectedUser.value = null;
+      selectedRole.value = '';
+    }
   }
 };
 
 const deleteTenancy = () => {
-  tenanciesStore.tenancies = tenanciesStore.tenancies.filter(t => t.organizationName !== tenancy.value.organizationName);
+  tenanciesStore.tenancies = tenanciesStore.tenancies.filter(t => t.name !== tenancy.value.name);
   alertService.addAlert('Tenancy deleted successfully', 'success');
   router.push('/tenancies');
 };
+
+fetchTenantRoles();
 </script>
 
 <template>
@@ -86,7 +119,7 @@ const deleteTenancy = () => {
       <v-sheet class="pa-4" width="100%" color="grey-lighten-3">
         <v-row>
           <v-col cols="6">
-            <h1>{{ tenancy?.organizationName }}</h1>
+            <h1>{{ tenancy?.name }}</h1>
           </v-col>
           <v-col cols="6" class="d-flex justify-end">
             <v-menu>
@@ -109,7 +142,7 @@ const deleteTenancy = () => {
         <v-row>
           <v-col cols="12" md="6">
             <v-text-field
-              :model-value="tenancy?.bcMinistry"
+              :model-value="tenancy?.ministryName"
               label="BC Ministry"
               readonly
               class="readonly-field"
@@ -117,7 +150,7 @@ const deleteTenancy = () => {
           </v-col>
           <v-col cols="12" md="6">
             <v-text-field
-              :model-value="tenancy?.users[0]?.idir_username"
+              :model-value="tenancy?.users[0]?.ssoUser?.displayName"
               label="Tenant Owner/Admin"
               readonly
               class="readonly-field"
@@ -150,15 +183,20 @@ const deleteTenancy = () => {
                 <v-col cols="12">
                   <v-data-table
                     :items="tenancy.users"
-                    item-value="email"
+                    item-value="id"
                     :headers="[
-                      { title: 'Name', value: 'name' },
-                      { title: 'Role', value: 'role' },
-                      { title: 'Email', value: 'email' }
+                      { title: 'Name', value: 'ssoUser.displayName' },
+                      { title: 'Roles', value: 'roles' },
+                      { title: 'Email', value: 'ssoUser.email' }
                     ]"
                   >
                     <template v-slot:no-data>
                       <v-alert type="info">You have no users in this tenancy.</v-alert>
+                    </template>
+                    <template #item.roles="{ item }">
+                      <v-chip v-for="role in item.roles" :key="role.id" color="primary" class="mr-2">
+                        {{ role.name }}
+                      </v-chip>
                     </template>
                   </v-data-table>
                 </v-col>
@@ -175,6 +213,7 @@ const deleteTenancy = () => {
                       { title: 'Last Name', value: 'lastName' },
                       { title: 'Email', value: 'email' }
                     ]"
+                    :loading="loadingSearchResults"
                     show-select
                     return-object
                     select-strategy="single"
@@ -211,7 +250,13 @@ const deleteTenancy = () => {
                   <v-select
                     v-model="searchOption"
                     label="Search by name or email"
-                    :items="['name', 'email']"
+                    :items="[
+                      { title: 'First Name', key: 'firstName' }, 
+                      { title: 'Last Name', key: 'lastName' }, 
+                      { title: 'Email', key: 'email'},
+                    ]"
+                    item-title="title"
+                    item-value="key"
                   ></v-select>
                 </v-col>
                 <v-col cols="12" md="6">
@@ -235,7 +280,9 @@ const deleteTenancy = () => {
                   <v-select
                     v-model="selectedRole"
                     label="Select a role"
-                    :items="[ROLES.TENANT_OWNER_ADMIN, ROLES.TENANT_USER_CHEFS_FORM_DESIGNER, ROLES.TENANT_USER_CHEFS_FORM_SUBMITTER]"
+                    :items="roles"
+                    item-title="description"
+                    item-value="name"
                   ></v-select>
                   <v-btn
                     :disabled="!selectedRole"

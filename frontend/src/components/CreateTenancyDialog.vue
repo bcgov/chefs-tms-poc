@@ -66,7 +66,7 @@ const ministries = [
 const addTenancy = async () => {
   if (formValid.value) {
     try {
-      const response = await createTenancy({
+      let response = await createTenancy({
         name: name.value,
         ministryName: ministryName.value,
         user: {
@@ -75,6 +75,7 @@ const addTenancy = async () => {
       });
       name.value = '';
       ministryName.value = '';
+      response.users[0].roles = [{ name: 'TMS.TENANT_ADMIN' }];
       tenancies.value.push(response);
       alertService.addAlert('New tenancy created successfully', 'success');
     } catch (error) {
