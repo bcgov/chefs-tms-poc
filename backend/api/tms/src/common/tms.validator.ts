@@ -4,7 +4,7 @@ export default {
 
     createTenant: {
         body: Joi.object({
-            name: Joi.string().min(1).max(20).required(),
+            name: Joi.string().min(1).max(30).required(),
             ministryName: Joi.string().min(1).max(100).required(),
             user: Joi.object().keys({
                 firstName: Joi.string().min(1).max(50).required(),
@@ -84,6 +84,22 @@ export default {
             tenantUserId: Joi.string().guid().required(),
             roleId: Joi.string().guid().required()
         })
+    },
+
+    searchBCGOVSSOUsers: {
+        query: Joi.object({
+            firstName: Joi.string(),
+            lastName: Joi.string(),
+            email: Joi.string(),
+            guid: Joi.string()
+        }).or('firstName', 'lastName', 'email', 'guid')
+    },
+    
+    getTenant: {
+        query: Joi.object({
+            expand: Joi.string().optional()
+            .pattern(/^(tenantUserRoles|roles)(,(tenantUserRoles|roles))?$/)
+        }).optional()
     }
 
 }

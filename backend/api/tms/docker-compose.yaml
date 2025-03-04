@@ -20,9 +20,7 @@ services:
     restart: unless-stopped
     depends_on:
       - postgres
-    environment:      
-      PORT: 4144
-      ALLOWED_ORIGINS: '*'
+    environment:            
       DB_HOST: host.docker.internal
       DB_PORT: 5454
       DB_USER: tms

@@ -1,0 +1,217 @@
+openapi: 3.0.3
+info:
+  title: Tenancy Management System API
+  description: API for managing tenants in the Tenancy Management System
+  version: 1.0.0
+servers:
+  - url: http://localhost:4144
+    description: Local dev server
+
+paths:
+  /v1/tenants:
+    post:
+      summary: Create a new tenant
+      description: Creates a new tenant in the system.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTenantRequest'
+      responses:
+        '201':
+          description: Tenant successfully created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateTenantResponse'
+        '400':
+          description: Invalid input (e.g., missing required fields, exceeding length limits) - general schema validation failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: General Internal Service Error
+          content:
+            application/json:              
+
+components:
+  schemas:
+    CreateTenantRequest:
+      type: object
+      required:
+        - name
+        - ministryName
+        - user
+      properties:
+        name:
+          type: string
+          description: The name of the tenant.
+          minLength: 1
+          maxLength: 30
+          example: "Roads initiative"
+        ministryName:
+          type: string
+          description: The name of the ministry associated with the tenant.
+          minLength: 1
+          maxLength: 100
+          example: "Ministry of Natural Resources"
+        user:
+          $ref: '#/components/schemas/User'
+    
+    User:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - displayName
+        - userName
+        - ssoUserId
+        - email
+      properties:
+        firstName:
+          type: string
+          description: The first name of the user.
+          minLength: 1
+          maxLength: 50
+          example: "Shankar"
+        lastName:
+          type: string
+          description: The last name of the user.
+          minLength: 1
+          maxLength: 50
+          example: "Sethuraman"
+        displayName:
+          type: string
+          description: The display name of the user in full.
+          minLength: 1
+          maxLength: 50
+          example: "Sethuraman, Shankar: JEDI: EX"
+        userName:
+          type: string
+          description: The IDIR username of the user.
+          minLength: 1
+          maxLength: 50
+          example: "SSETHURA"
+        ssoUserId:
+          type: string
+          description: The SSO user ID associated with the user.
+          format: guid
+          example: "fd33f1cef7ca4b19a71104d4ecf7066b"
+        email:
+          type: string
+          format: email
+          description: The email address of the user.
+          example: "shankar@gov.bc.ca"
+    
+    CreateTenantResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            tenant:
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                  example: "8d55b857-e9db-44b6-b7ea-654fbe2cc3be"
+                name:
+                  type: string
+                  example: "Roads Initiative"
+                ministryName:
+                  type: string
+                  example: "Ministry of Natural Resources"
+                createdDateTime:
+                  type: string
+                  format: date-time
+                  example: "2025-02-26T01:28:52.693Z"
+                updatedDateTime:
+                  type: string
+                  format: date-time
+                  example: "2025-02-26T01:28:52.693Z"
+                users:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: "Tenant User ID of the user who created the tenant"
+                        format: uuid
+                        example: "c3f8deea-1a9e-4a65-b2bb-552b906d59c1"
+                      createdDateTime:
+                        type: string
+                        format: date-time
+                        example: "2025-02-26T01:28:52.693Z"
+                      updatedDateTime:
+                        type: string
+                        format: date-time
+                        example: "2025-02-26T01:28:52.693Z"
+                      ssoUser:
+                        type: object
+                        description: "Unique reference of the tenant user as configured in SSO"
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: "6ff38676-1e0b-4e54-ae86-a5a9df44cd2d"
+                          ssoUserId:
+                            type: string
+                            description: "Unique ID of this user in SSO. This ID will be the same for every login and across all tenants"
+                            format: uuid
+                            example: "fd33f1cef7ca4b19a71104d4ecf7066b"
+                          firstName:
+                            type: string
+                            example: "Shankar"
+                          lastName:
+                            type: string
+                            example: "Sethuraman"
+                          displayName:
+                            type: string
+                            example: "Sethuraman, Shankar: JEDI: EX"
+                          userName:
+                            type: string
+                            example: "SSETHURA"
+                          email:
+                            type: string
+                            format: email
+                            example: "shankar@gov.bc.ca"
+                          createdDateTime:
+                            type: string
+                            format: date-time
+                            example: "2025-02-26T00:39:42.892Z"
+                          updatedDateTime:
+                            type: string
+                            format: date-time
+                            example: "2025-02-26T00:39:42.892Z"
+    
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: A human-readable error message.
+          example: "Invalid input: name must be between 3 and 100 characters."
+        code:
+          type: integer
+          description: HTTP status code.
+          example: 400
+
+    InternalServerErrorResponse:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Error occurred during tenant creation"
+        message:
+          type: string
+          example: "An error occurred creating a tenant"
+        httpResponseCode:
+          type: integer
+          example: 500
+        errorMessage:
+          type: string
+          example: "Internal Server Error"

@@ -249,6 +249,33 @@ export class TMSRepository {
           });
     }
 
+    public async getTenant(req:Request) {
+        const tenantId:string = req.params.id
+        const expand: string[] = typeof req.query.expand === "string" ? req.query.expand.split(",") : []
+
+        const tenantQuery = this.manager
+            .createQueryBuilder(Tenant, "tenant")
+            .where("tenant.id = :tenantId", { tenantId })
+
+        if (expand.includes("tenantUserRoles")) {
+            tenantQuery.leftJoinAndSelect("tenant.users", "user").leftJoinAndSelect("user.ssoUser", "ssoUser")
+            tenantQuery.leftJoinAndSelect("user.roles", "tenantUserRole")
+            tenantQuery.leftJoinAndSelect("tenantUserRole.role", "role")                     
+        }
+        const tenant:Tenant = await tenantQuery.getOne();
+        
+        if(!tenant) {
+            throw new NotFoundError("Tenant Not Found: "+tenantId)
+        }
+
+        if (expand.includes("roles")) {
+            const tenantRoles:Role[] = await this.findTenantRoles(tenantId)
+            tenant.roles = tenantRoles
+        }
+            
+        return tenant
+    }
+
     public async getTenantUserRole(tenantId:string,tenantUserId:string,roleId:string)  {
         const tenantUserRole:TenantUserRole = await this.manager
             .createQueryBuilder(TenantUserRole, "tenantUserRole")

@@ -157,4 +157,30 @@ export class TMSController {
         }
     }
 
+    public async searchBCGOVSSOUsers(req:Request,res:Response) {
+        try {
+            const users = await this.tmsService.searchBCGOVSSOUsers(req)
+            return res.status(200).send(users)
+        }
+        catch(error) {            
+                this.errorHandler.generalError(res,"Error occurred searching SSO users", error.message, 500, "Internal Server Error")
+        }   
+    }
+
+    public async getTenant(req:Request, res:Response) {
+        try {
+            const tenant = await this.tmsService.getTenant(req)
+            return res.status(200).send(tenant)
+        }
+        catch(error) {
+            console.log(error)
+            if (error instanceof NotFoundError) {
+                this.errorHandler.generalError(res,"Error occurred getting a tenant", error.message, error.statusCode, "Not Found")
+            }
+            else {    
+                this.errorHandler.generalError(res,"Error occurred getting a tenant", error.message, 500, "Internal Server Error")
+            } 
+        }
+    }
+
 }
