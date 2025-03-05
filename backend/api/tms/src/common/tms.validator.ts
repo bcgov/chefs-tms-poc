@@ -10,26 +10,29 @@ export default {
                 firstName: Joi.string().min(1).max(50).required(),
                 lastName: Joi.string().min(1).max(50).required(),
                 displayName: Joi.string().min(1).max(50).required(),
-                userName: Joi.string().min(1).max(50).required(),
+                userName: Joi.string().min(1).max(15).optional(),
                 ssoUserId: Joi.string().required(), // will need to be updated to the right regex and length
-                email:Joi.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).max(100).required(),                
+                email:Joi.string().email().max(100).required(),                
             }).min(1)
         }).options({abortEarly:false,convert:false})
     },
 
     addTenantUser: {
         params: Joi.object({
-            id: Joi.string().guid().required()
+            tenantId: Joi.string().guid().required()
         }),
         body: Joi.object({
             user: Joi.object().keys({
                 firstName: Joi.string().min(1).max(50).required(),
                 lastName: Joi.string().min(1).max(50).required(),
                 displayName: Joi.string().min(1).max(50).required(),
-                userName: Joi.string().min(1).max(50).required(),
+                userName: Joi.string().min(1).max(15).optional(),
                 ssoUserId: Joi.string().required(), // will need to be updated to the right regex and length
-                email:Joi.string().regex(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).max(100).required(),                
-            }).min(1)
+                email:Joi.string().email().max(100).required(),                
+            }).required(),
+            role: Joi.object({
+                id: Joi.string().guid()
+            }).optional()
         }).options({abortEarly:false,convert:false})
     },
 
@@ -41,13 +44,13 @@ export default {
 
     getTenantUsers: {
         params: Joi.object({
-            id: Joi.string().guid().required()
+            tenantId: Joi.string().guid().required()
         }).options({abortEarly:false,convert:false})
     },
 
     createTenantRoles: {
         params: Joi.object({
-            id: Joi.string().guid().required()
+            tenantId: Joi.string().guid().required()
         }),
         body: Joi.object({
             role: Joi.object().keys({
@@ -62,28 +65,28 @@ export default {
             tenantId: Joi.string().guid().required(),
             tenantUserId: Joi.string().guid().required(),
             roleId: Joi.string().guid().required()
-        })
+        }).options({abortEarly:false,convert:false})
     },
 
     getTenantRoles: {
         params: Joi.object({
-            id: Joi.string().guid().required()
-        })
+            tenantId: Joi.string().guid().required()
+        }).options({abortEarly:false,convert:false})
     },
 
     getUserRoles: {
         params: Joi.object({
-            id: Joi.string().guid().required(),
+            tenantId: Joi.string().guid().required(),
             tenantUserId: Joi.string().guid().required()
-        })
+        }).options({abortEarly:false,convert:false})
     },
 
     unassignUserRoles: {
         params: Joi.object({
-            id: Joi.string().guid().required(),
+            tenantId: Joi.string().guid().required(),
             tenantUserId: Joi.string().guid().required(),
             roleId: Joi.string().guid().required()
-        })
+        }).options({abortEarly:false,convert:false})
     },
 
     searchBCGOVSSOUsers: {
@@ -96,6 +99,9 @@ export default {
     },
     
     getTenant: {
+        params: Joi.object({
+            tenantId: Joi.string().guid().required()
+        }),
         query: Joi.object({
             expand: Joi.string().optional()
             .pattern(/^(tenantUserRoles|roles)(,(tenantUserRoles|roles))?$/)

@@ -85,15 +85,15 @@ export class TMSRepository {
         await this.manager.transaction(async(transactionEntityManager) => {
 
         try {  
-
-            if(!await this.checkIfTenantExists(req.params.id)) {  
-                throw new NotFoundError("Tenant Not Found: "+req.params.id)
+            const tenantId:string = req.params.tenantId
+            if(!await this.checkIfTenantExists(tenantId)) {  
+                throw new NotFoundError("Tenant Not Found: "+tenantId)
             } 
         
-            const tenant:Tenant = await this.getTenantIfUserDoesNotExistForTenant(req.body.user.ssoUserId,req.params.id)
+            const tenant:Tenant = await this.getTenantIfUserDoesNotExistForTenant(req.body.user.ssoUserId,tenantId)
     
             if(!tenant) {
-                throw new ConflictError("User is already added to this tenant: "+req.params.id)
+                throw new ConflictError("User is already added to this tenant: "+tenantId)
             }
     
             const tenantUser:TenantUser = new TenantUser()
@@ -105,25 +105,30 @@ export class TMSRepository {
     
             const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
 
-            delete savedTenantUser.tenant
-            response = savedTenantUser
+            if(req.body.role?.id) {
+                const resp:any = this.assignUserRoles(tenantId,savedTenantUser.id,req.body.role.id)                
+                response = resp
+            }
+            else {
+                delete savedTenantUser.tenant
+                response = savedTenantUser
+            }
         }
         
         catch(error) {
             console.error('Add user to a tenant transaction failure - rolling back inserts ', error);
             throw error
         }
-    });  
-
-    return response
-
+        
+    });     
+        return response
     }
 
     public async createRoles(req:Request) {
         let response = {}
         await this.manager.transaction(async(transactionEntityManager) => {
             try {
-                const tenantId:string = req.params.id
+                const tenantId:string = req.params.tenantId
                 const requestRole = req.body.role
 
                 const tenant:Tenant = await transactionEntityManager.findOne(Tenant,{where: {id:tenantId}})
@@ -155,11 +160,11 @@ export class TMSRepository {
         return response
     }
 
-    public async assignUserRoles(req:Request) {
+    public async assignUserRoles(tenantId:string, tenantUserId:string, roleId:string) {
         let response = {}
         await this.manager.transaction(async(transactionEntityManager) => {
             try {
-                const { tenantId, tenantUserId, roleId } = req.params;
+               // const { tenantId, tenantUserId, roleId } = req.params;
                 const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
                 if(tenantWithUsersAndRoles) {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
@@ -212,7 +217,7 @@ export class TMSRepository {
     }
 
     public async getTenantRoles(req:Request) {
-        const tenantId:string = req.params.id
+        const tenantId:string = req.params.tenantId
         if(!await this.checkIfTenantExists(tenantId)) {
             throw new NotFoundError("Tenant Not Found: "+tenantId)
         }
@@ -223,7 +228,7 @@ export class TMSRepository {
     }
 
     public async getUserRoles(req:Request) {
-        const tenantId = req.params.id
+        const tenantId = req.params.tenantId
         const tenantUserId = req.params.tenantUserId
         if(!await this.checkIfTenantUserExistsForTenant(tenantId,tenantUserId) ) {
             throw new NotFoundError("Tenant or Tenant user not found: Tenant: "+tenantId+" Tenant User: "+tenantUserId)
@@ -235,7 +240,7 @@ export class TMSRepository {
     }
 
     public async unassignUserRoles(req:Request) {
-        const tenantId = req.params.id
+        const tenantId = req.params.tenantId
         const tenantUserId = req.params.tenantUserId
         const roleId = req.params.roleId
         const assignedTenantUserRole:TenantUserRole = await this.getTenantUserRole(tenantId,tenantUserId,roleId)       
@@ -250,7 +255,7 @@ export class TMSRepository {
     }
 
     public async getTenant(req:Request) {
-        const tenantId:string = req.params.id
+        const tenantId:string = req.params.tenantId
         const expand: string[] = typeof req.query.expand === "string" ? req.query.expand.split(",") : []
 
         const tenantQuery = this.manager
