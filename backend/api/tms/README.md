@@ -48,3 +48,7 @@ There are two ways to run this API locally.
     3. docker volume prune -f
 
     4. docker compose up --build
+
+5. Generate migration after entity changes:
+
+    1. npx typeorm-ts-node-commonjs migration:generate -d ./src/common/db.connection.ts ./src/migrations/<name>
