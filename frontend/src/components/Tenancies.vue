@@ -1,39 +1,48 @@
 <script setup>
+// Import necessary functions and refs from Vue, Pinia, and Vue Router
 import { storeToRefs } from 'pinia';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useTenanciesStore } from '../stores/tenancies';
-import CreateTenancyDialog from './CreateTenancyDialog.vue';
-import { getUserTenants } from '../services/userService';
-import { getTenantUsers, getTenantUserRoles } from '../services/tenantService';
+import { useTenanciesStore } from '~/stores/tenancies';
+import { ROLES } from '~/utils/constants';
+import CreateTenancyDialog from '~/components/CreateTenancyDialog.vue';
+import { getUserTenants } from '~/services/userService';
+import { getTenantUsers, getTenantUserRoles } from '~/services/tenantService';
 
+// Initialize tenancies store and router
 const tenanciesStore = useTenanciesStore();
 const router = useRouter();
+
+// Reactive references for dialog visibility and tenancies
 const dialogVisible = ref(false);
 const { tenancies } = storeToRefs(tenanciesStore);
 
+// Function to open the Create Tenancy dialog
 const openDialog = () => {
   dialogVisible.value = true;
 };
 
+// Function to close the Create Tenancy dialog
 const closeDialog = () => {
   dialogVisible.value = false;
 };
 
-const goToManageTenancy = (name) => {
-  router.push({ path: `/tenancies/${name}` });
+// Function to navigate to the Manage Tenancy view
+const goToManageTenancy = (id) => {
+  router.push({ path: `/tenancies/${id}` });
 };
 
+// Computed property to find the first admin user in the tenancies
 const firstAdminUser = computed(() => {
   return (
     tenancies.value
       ?.flatMap((tenancy) => tenancy.users)
-      ?.find((user) =>
-        user.roles.some((role) => role.name === 'TMS.TENANT_ADMIN'),
-      ) || null
+      ?.find((user) => user.roles.some((role) => role.name === ROLES.ADMIN)) ||
+    null
   );
 });
 
+// Function to fetch user tenants and their details
 const fetchUserTenants = async () => {
   try {
     let tcies = [];
@@ -56,12 +65,15 @@ const fetchUserTenants = async () => {
   }
 };
 
+// Fetch user tenants when the component is created
 fetchUserTenants();
 </script>
 
 <template>
   <BaseSecure>
+    <!-- Container for the main content -->
     <v-container class="mt-4">
+      <!-- Row for the Create New Tenancy button -->
       <v-row>
         <v-col cols="12">
           <v-btn
@@ -77,6 +89,7 @@ fetchUserTenants();
           </v-btn>
         </v-col>
       </v-row>
+      <!-- Row for displaying the tenancies -->
       <v-row>
         <v-col v-for="tenancy in tenancies" :key="tenancy.id" cols="12" md="4">
           <v-card @click="goToManageTenancy(tenancy.id)">
@@ -92,6 +105,7 @@ fetchUserTenants();
         </v-col>
       </v-row>
     </v-container>
+    <!-- Create Tenancy Dialog component -->
     <CreateTenancyDialog :visible="dialogVisible" @close="closeDialog" />
   </BaseSecure>
 </template>

@@ -1,87 +1,59 @@
 <script setup>
-import { ref, inject, computed } from 'vue';
-import { useTenanciesStore } from '../stores/tenancies';
-import { getUser } from '../services/keycloak';
-import { createTenancy } from '../services/tenantService';
+// Import necessary functions and refs from Vue and Pinia
 import { storeToRefs } from 'pinia';
+import { ref, inject, computed } from 'vue';
+import { getUser } from '~/services/keycloak';
+import { createTenancy } from '~/services/tenantService';
+import { useTenanciesStore } from '~/stores/tenancies';
+import { MINISTRIES, ROLES } from '~/utils/constants';
 
+// Define props and emits for the component
 const props = defineProps({
   visible: Boolean,
 });
 const emit = defineEmits(['close']);
 
+// Initialize the tenancies store and inject the notification service
 const tenanciesStore = useTenanciesStore();
-const alertService = inject('alertService');
-const username = ref('');
+const notificationService = inject('notificationService');
+
+// Reactive references for form fields and state
+const username = ref(getUser().displayName);
 const name = ref('');
 const ministryName = ref('');
 const formValid = ref(false);
 const { tenancies } = storeToRefs(tenanciesStore);
 
-username.value = getUser().displayName;
-
+// Validation rules for form fields
 const rules = {
   required: (value) => !!value || 'Required',
 };
 
+// Computed property to watch the visibility prop
 const visible = computed(() => props.visible);
 
-const ministries = [
-  'Agriculture and Food',
-  'Attorney General',
-  'Crown Agencies and Board Resourcing Office',
-  'Compliance & Enforcement Collaborative',
-  'Corporate Information and Records Management Office',
-  "Citizens' Services",
-  'Education and Child Care',
-  'Energy and Climate Solutions',
-  'Emergency Management and Climate Readiness',
-  'Environment and Parks',
-  'BC Elections',
-  'Finance',
-  'Forests',
-  'Government Communications and Public Engagement',
-  'Housing and Municipal Affairs',
-  'Health',
-  'Intergovernmental Relations Secretariat',
-  'Ministry of Infrastructure',
-  'Indigenous Relations & Reconciliation',
-  'Jobs, Economic Development and Innovation',
-  'Labour',
-  'Mining and Critical Materials',
-  'Children and Family Development',
-  'Office of the Comptroller General',
-  'Office of the Chief Information Officer',
-  'Office of the Premier',
-  'BC Public Service Agency',
-  "Public Sector Employers' Council Secretariat",
-  'Post-Secondary Education and Future Skills',
-  'Public Safety and Solicitor General',
-  'Provincial Treasury',
-  'Social Development and Poverty Reduction',
-  'Tourism, Arts, Culture and Sport',
-  'Treasury Board Staff',
-  'Transportation and Transit',
-  'Water, Land and Resource Stewardship',
-];
-
+// Function to add a new tenancy
 const addTenancy = async () => {
   if (formValid.value) {
     try {
       let response = await createTenancy({
         name: name.value,
         ministryName: ministryName.value,
-        user: {
-          ...getUser(),
-        },
+        user: getUser(),
       });
       name.value = '';
       ministryName.value = '';
-      response.users[0].roles = [{ name: 'TMS.TENANT_ADMIN' }];
+      response.users[0].roles = [{ name: ROLES.ADMIN }];
       tenancies.value.push(response);
-      alertService.addAlert('New tenancy created successfully', 'success');
+      notificationService.addNotification(
+        'New tenancy created successfully',
+        'success',
+      );
     } catch (error) {
-      alertService.addAlert('Failed to create new tenancy', 'error');
+      notificationService.addNotification(
+        'Failed to create new tenancy',
+        'error',
+      );
       this.$error(error);
     } finally {
       emit('close');
@@ -89,6 +61,7 @@ const addTenancy = async () => {
   }
 };
 
+// Function to close the dialog
 const closeDialog = () => {
   emit('close');
 };
@@ -122,7 +95,7 @@ const closeDialog = () => {
             <v-col cols="12" md="6">
               <v-select
                 v-model="ministryName"
-                :items="ministries"
+                :items="MINISTRIES"
                 label="BC Ministries"
                 :rules="[rules.required]"
                 placeholder="Select an option..."

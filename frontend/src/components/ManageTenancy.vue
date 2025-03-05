@@ -1,20 +1,27 @@
 <script setup>
-import { ref, computed, inject } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
-import { useTenanciesStore } from '../stores/tenancies';
-import { searchIdirUsers } from '../services/userService';
-import { getTenantRoles, addTenantUsers } from '../services/tenantService';
+// Import necessary functions and refs from Vue, Vue Router, and Pinia
 import { storeToRefs } from 'pinia';
+import { ref, computed, inject, onMounted } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { searchIdirUsers } from '~/services/userService';
+import { getTenantRoles, addTenantUsers } from '~/services/tenantService';
+import { useTenanciesStore } from '~/stores/tenancies';
 
+// Initialize route and router
 const route = useRoute();
 const router = useRouter();
+
+// Initialize tenancies store and notification service
 const tenanciesStore = useTenanciesStore();
-const alertService = inject('alertService');
+const notificationService = inject('notificationService');
 const { tenancies } = storeToRefs(tenanciesStore);
+
+// Computed property to find the current tenancy based on route params
 const tenancy = computed(() =>
   tenancies.value.find((t) => t.id === route.params.id),
 );
 
+// Breadcrumbs computed property for navigation
 const breadcrumbs = computed(() => [
   { title: 'Tenancies', disabled: false, href: '/tenancies' },
   {
@@ -24,6 +31,7 @@ const breadcrumbs = computed(() => [
   },
 ]);
 
+// Reactive references for form fields and state
 const loadingSearchResults = ref(false);
 const tab = ref(1);
 const roles = ref([]);
@@ -32,9 +40,9 @@ const searchText = ref('');
 const searchResults = ref([]);
 const selectedUser = ref(null);
 const selectedRole = ref('');
-
 const deleteDialogVisible = ref(false);
 
+// Function to fetch tenant roles
 const fetchTenantRoles = async () => {
   try {
     const response = await getTenantRoles(route.params.id);
@@ -44,11 +52,12 @@ const fetchTenantRoles = async () => {
   }
 };
 
+// Function to search users based on search option and text
 const searchUsers = async () => {
   if (searchOption.value && searchText.value) {
     try {
       loadingSearchResults.value = true;
-      let params = {};
+      const params = {};
       if (searchOption.value === 'firstName') {
         params.firstName = searchText.value.toLowerCase();
       }
@@ -92,11 +101,12 @@ const searchUsers = async () => {
   }
 };
 
+// Function to add a user to the current tenancy
 const addUserToTenancy = async () => {
   if (tenancy.value && selectedUser.value) {
     try {
       const role = roles.value.find((role) => role.name === selectedRole.value);
-      let response = await addTenantUsers(
+      const response = await addTenantUsers(
         tenancy.value.id,
         {
           ...selectedUser.value[0],
@@ -108,6 +118,10 @@ const addUserToTenancy = async () => {
         ...response.user,
         roles: [response.role],
       });
+      notificationService.addNotification(
+        'User added to tenancy successfully',
+        'success',
+      );
     } catch (error) {
       this.$error(error);
     } finally {
@@ -118,26 +132,36 @@ const addUserToTenancy = async () => {
   }
 };
 
+// Function to delete the current tenancy
 const deleteTenancy = () => {
   tenanciesStore.tenancies = tenanciesStore.tenancies.filter(
     (t) => t.name !== tenancy.value.name,
   );
-  alertService.addAlert('Tenancy deleted successfully', 'success');
+  notificationService.addNotification(
+    'Tenancy deleted successfully',
+    'success',
+  );
   router.push('/tenancies');
 };
 
-fetchTenantRoles();
+// Fetch tenant roles when the component is mounted
+onMounted(fetchTenantRoles);
 </script>
 
 <template>
   <BaseSecure>
+    <!-- Breadcrumbs for navigation -->
     <v-breadcrumbs :items="breadcrumbs" divider=">" color="primary" />
+
+    <!-- Main container for tenancy information -->
     <v-container fluid>
       <v-sheet class="pa-4" width="100%" color="grey-lighten-3">
         <v-row>
+          <!-- Tenancy name -->
           <v-col cols="6">
             <h1>{{ tenancy?.name }}</h1>
           </v-col>
+          <!-- Edit and Delete options -->
           <v-col cols="6" class="d-flex justify-end">
             <v-menu>
               <template #activator="{ props }">
@@ -157,6 +181,7 @@ fetchTenantRoles();
           </v-col>
         </v-row>
         <v-row>
+          <!-- BC Ministry name -->
           <v-col cols="12" md="6">
             <v-text-field
               :model-value="tenancy?.ministryName"
@@ -165,6 +190,7 @@ fetchTenantRoles();
               class="readonly-field"
             ></v-text-field>
           </v-col>
+          <!-- Tenant Owner/Admin -->
           <v-col cols="12" md="6">
             <v-text-field
               :model-value="tenancy?.users[0]?.ssoUser?.displayName"
@@ -176,6 +202,7 @@ fetchTenantRoles();
         </v-row>
       </v-sheet>
 
+      <!-- Tabs for different sections -->
       <v-card>
         <v-tabs v-model="tab">
           <v-tab :value="1">Project Information</v-tab>
@@ -184,6 +211,7 @@ fetchTenantRoles();
         </v-tabs>
 
         <v-tabs-window v-model="tab">
+          <!-- Project Information Tab -->
           <v-tabs-window-item :value="1">
             <v-container fluid>
               <v-row>
@@ -194,6 +222,7 @@ fetchTenantRoles();
             </v-container>
           </v-tabs-window-item>
 
+          <!-- User Management Tab -->
           <v-tabs-window-item :value="2">
             <v-container fluid>
               <v-row>
@@ -225,7 +254,9 @@ fetchTenantRoles();
                   </v-data-table>
                 </v-col>
               </v-row>
+
               <v-divider></v-divider>
+
               <v-row>
                 <v-col cols="12">
                   <v-data-table
@@ -275,6 +306,7 @@ fetchTenantRoles();
               </v-row>
 
               <v-divider></v-divider>
+
               <v-row v-if="selectedUser">
                 <v-col cols="12">
                   <h3>Add a user to this Tenancy</h3>
@@ -283,6 +315,7 @@ fetchTenantRoles();
                   </p>
                 </v-col>
               </v-row>
+
               <v-row>
                 <v-col cols="12" md="4">
                   <v-select
@@ -331,6 +364,7 @@ fetchTenantRoles();
             </v-container>
           </v-tabs-window-item>
 
+          <!-- Available Services Tab -->
           <v-tabs-window-item :value="3">
             <v-container fluid>
               <v-row>
@@ -362,7 +396,7 @@ fetchTenantRoles();
           />
         </v-card-title>
         <v-card-text>
-          All users, roles and permissions related to this tenancy will be
+          All users, roles, and permissions related to this tenancy will be
           permanently deleted.
         </v-card-text>
         <v-card-actions>

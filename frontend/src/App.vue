@@ -1,25 +1,35 @@
 <script setup>
-import Header from './components/Header.vue';
-import Navbar from './components/Navbar.vue';
-import alertService from './services/alertService';
+import Header from '~/components/Header.vue';
+import Navbar from '~/components/Navbar.vue';
+import notificationService from '~/utils/notificationService';
 
-const alerts = alertService.state.alerts;
+// Access the notifications state from the notification service
+const notifications = notificationService.state.notifications;
 </script>
 
 <template>
   <v-app>
-    <div v-for="alert in alerts" :key="alert.id" class="alert-container">
+    <!-- Notification container that iterates through and displays notifications -->
+    <div
+      v-for="notification in notifications"
+      :key="notification.id"
+      class="notification-container"
+    >
+      <!-- Vuetify alert component for each notification -->
       <v-alert
-        :type="alert.type"
+        :type="notification.type"
         closable
-        @click="alertService.removeAlert(alert.id)"
+        @click="notificationService.removeNotification(notification.id)"
       >
-        {{ alert.message }}
+        {{ notification.message }}
       </v-alert>
     </div>
+    <!-- Header component -->
     <Header />
+    <!-- Navbar component -->
     <Navbar />
     <v-main>
+      <!-- Router view for dynamic component rendering -->
       <router-view></router-view>
     </v-main>
   </v-app>
@@ -28,11 +38,13 @@ const alerts = alertService.state.alerts;
 <style scoped>
 @import 'vuetify/styles';
 
+/* Main container adjustments */
 .v-main {
   --v-layout-top: 0px;
 }
 
-.alert-container {
+/* Notification container styling */
+.notification-container {
   position: fixed;
   top: 10px;
   left: 50%;
