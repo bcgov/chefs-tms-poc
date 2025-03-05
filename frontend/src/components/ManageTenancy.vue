@@ -257,7 +257,7 @@ onMounted(fetchTenantRoles);
 
               <v-divider></v-divider>
 
-              <v-row>
+              <v-row class="mt-2">
                 <v-col cols="12">
                   <v-data-table
                     v-model="selectedUser"
@@ -316,7 +316,7 @@ onMounted(fetchTenantRoles);
                 </v-col>
               </v-row>
 
-              <v-row>
+              <v-row class="mt-2">
                 <v-col cols="12" md="4">
                   <v-select
                     v-model="searchOption"
@@ -340,6 +340,7 @@ onMounted(fetchTenantRoles);
                 <v-col cols="12" md="2">
                   <v-btn
                     :disabled="!searchOption || !searchText"
+                    size="x-large"
                     @click="searchUsers"
                     >Search</v-btn
                   >
