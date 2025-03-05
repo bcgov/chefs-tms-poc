@@ -1,6 +1,10 @@
 <script setup>
 import { ref } from 'vue';
-import { logout, isLoggedIn as checkIsLoggedIn, getToken, getUser } from '../services/keycloak';
+import {
+  logout,
+  isLoggedIn as checkIsLoggedIn,
+  getUser,
+} from '../services/keycloak';
 
 const isLoggedIn = ref(checkIsLoggedIn());
 const userInfo = ref(null);
@@ -15,7 +19,7 @@ const handleLogout = () => {
 </script>
 
 <template>
-  <v-app-bar app elevation="1">
+  <v-app-bar elevation="1">
     <v-toolbar-title>My Application</v-toolbar-title>
     <v-spacer></v-spacer>
     <template #append>
@@ -29,9 +33,9 @@ const handleLogout = () => {
 </template>
 
 <style scoped>
-  header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>

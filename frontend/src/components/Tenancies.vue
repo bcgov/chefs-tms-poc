@@ -25,9 +25,13 @@ const goToManageTenancy = (name) => {
 };
 
 const firstAdminUser = computed(() => {
-  return tenancies.value?.flatMap(tenancy => tenancy.users)?.find(user => 
-    user.roles.some(role => role.name === 'TMS.TENANT_ADMIN')
-  ) || null;
+  return (
+    tenancies.value
+      ?.flatMap((tenancy) => tenancy.users)
+      ?.find((user) =>
+        user.roles.some((role) => role.name === 'TMS.TENANT_ADMIN'),
+      ) || null
+  );
 });
 
 const fetchUserTenants = async () => {
@@ -48,7 +52,7 @@ const fetchUserTenants = async () => {
     }
     tenancies.value = tcies;
   } catch (error) {
-    console.error(error);
+    this.$error(error);
   }
 };
 
@@ -60,9 +64,14 @@ fetchUserTenants();
     <v-container class="mt-4">
       <v-row>
         <v-col cols="12">
-          <v-btn variant="text" color="primary" prepend-icon="mdi-plus-box" @click="openDialog">
-            <template v-slot:prepend>
-                <v-icon color="primary" size="x-large"></v-icon>
+          <v-btn
+            variant="text"
+            color="primary"
+            prepend-icon="mdi-plus-box"
+            @click="openDialog"
+          >
+            <template #prepend>
+              <v-icon color="primary" size="x-large"></v-icon>
             </template>
             Create New Tenancy
           </v-btn>
@@ -74,8 +83,10 @@ fetchUserTenants();
             <v-card-title>{{ tenancy.name }}</v-card-title>
             <v-card-subtitle>{{ tenancy.ministryName }}</v-card-subtitle>
             <v-card-text v-if="firstAdminUser != null">
-                <p>Tenant Owner/Admin:  {{ firstAdminUser.ssoUser.displayName }}</p>
-                <p>{{ firstAdminUser.ssoUser.email }}</p>
+              <p>
+                Tenant Owner/Admin: {{ firstAdminUser.ssoUser.displayName }}
+              </p>
+              <p>{{ firstAdminUser.ssoUser.email }}</p>
             </v-card-text>
           </v-card>
         </v-col>

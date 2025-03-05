@@ -2,7 +2,6 @@
 import { ref, computed, inject } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useTenanciesStore } from '../stores/tenancies';
-import { ROLES } from '../constants';
 import { searchIdirUsers } from '../services/userService';
 import { getTenantRoles, addTenantUsers } from '../services/tenantService';
 import { storeToRefs } from 'pinia';
@@ -12,11 +11,17 @@ const router = useRouter();
 const tenanciesStore = useTenanciesStore();
 const alertService = inject('alertService');
 const { tenancies } = storeToRefs(tenanciesStore);
-const tenancy = computed(() => tenancies.value.find(t => t.id === route.params.id));
+const tenancy = computed(() =>
+  tenancies.value.find((t) => t.id === route.params.id),
+);
 
 const breadcrumbs = computed(() => [
-    { title: 'Tenancies', disabled: false, href: '/tenancies', },
-    { title: tenancy.value.name, disabled: false, href: `/tenancies/${tenancy.value.id}`, },
+  { title: 'Tenancies', disabled: false, href: '/tenancies' },
+  {
+    title: tenancy.value.name,
+    disabled: false,
+    href: `/tenancies/${tenancy.value.id}`,
+  },
 ]);
 
 const loadingSearchResults = ref(false);
@@ -35,7 +40,7 @@ const fetchTenantRoles = async () => {
     const response = await getTenantRoles(route.params.id);
     roles.value = response;
   } catch (error) {
-    console.error(error);
+    this.$error(error);
   }
 };
 
@@ -46,31 +51,41 @@ const searchUsers = async () => {
       let params = {};
       if (searchOption.value === 'firstName') {
         params.firstName = searchText.value.toLowerCase();
-      } if (searchOption.value === 'lastName') {
+      }
+      if (searchOption.value === 'lastName') {
         params.lastName = searchText.value.toLowerCase();
       } else if (searchOption.value === 'email') {
         params.email = searchText.value.toLowerCase();
       }
       const response = await searchIdirUsers(params);
-      searchResults.value = response.map(user => {
-        const displayName = user.attributes.display_name ? user.attributes.display_name[0] : user.attributes.displayName;
-        const ssoUserId = user.attributes.idir_user_guid ? user.attributes.idir_user_guid[0] : user.attributes.idir_userid;
+      searchResults.value = response
+        .map((user) => {
+          const displayName = user.attributes.display_name
+            ? user.attributes.display_name[0]
+            : user.attributes.displayName;
+          const ssoUserId = user.attributes.idir_user_guid
+            ? user.attributes.idir_user_guid[0]
+            : user.attributes.idir_userid;
+          const userName = user.attributes.idir_username
+            ? user.attributes.idir_username[0]
+            : null;
 
-        if (!displayName || !ssoUserId) {
-          return null;
-        }
+          if (!displayName || !ssoUserId) {
+            return null;
+          }
 
-        return {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          displayName: displayName,
-          userName: user.username,
-          ssoUserId: ssoUserId,
-          email: user.email,
-        };
-      }).filter(user => user !== null);
+          return {
+            firstName: user.firstName,
+            lastName: user.lastName,
+            displayName: displayName,
+            userName: userName,
+            ssoUserId: ssoUserId,
+            email: user.email,
+          };
+        })
+        .filter((user) => user !== null);
     } catch (error) {
-      console.log(error);
+      this.$error(error);
     } finally {
       loadingSearchResults.value = false;
     }
@@ -80,21 +95,21 @@ const searchUsers = async () => {
 const addUserToTenancy = async () => {
   if (tenancy.value && selectedUser.value) {
     try {
-      /* tenancy.value.users.push({
-        ...selectedUser.value[0],
-        role: selectedRole.value
-      }); */
-      let addTenantUserResponse = await addTenantUsers(tenancy.value.id, {
-        user: {
+      const role = roles.value.find((role) => role.name === selectedRole.value);
+      let response = await addTenantUsers(
+        tenancy.value.id,
+        {
           ...selectedUser.value[0],
-        }
+        },
+        role?.id !== null ? role.id : null,
+      );
+      const idx = tenancies.value.findIndex((t) => t.id === route.params.id);
+      tenancies.value[idx].users.push({
+        ...response.user,
+        roles: [response.role],
       });
-      if (addTenantUserResponse?.id) {
-
-      }
-      console.log(addTenantUserResponse);
     } catch (error) {
-      console.error(error);
+      this.$error(error);
     } finally {
       searchResults.value = [];
       selectedUser.value = null;
@@ -104,7 +119,9 @@ const addUserToTenancy = async () => {
 };
 
 const deleteTenancy = () => {
-  tenanciesStore.tenancies = tenanciesStore.tenancies.filter(t => t.name !== tenancy.value.name);
+  tenanciesStore.tenancies = tenanciesStore.tenancies.filter(
+    (t) => t.name !== tenancy.value.name,
+  );
   alertService.addAlert('Tenancy deleted successfully', 'success');
   router.push('/tenancies');
 };
@@ -114,7 +131,7 @@ fetchTenantRoles();
 
 <template>
   <BaseSecure>
-    <v-breadcrumbs :items="breadcrumbs" divider=">" color="primary"/>
+    <v-breadcrumbs :items="breadcrumbs" divider=">" color="primary" />
     <v-container fluid>
       <v-sheet class="pa-4" width="100%" color="grey-lighten-3">
         <v-row>
@@ -187,14 +204,21 @@ fetchTenantRoles();
                     :headers="[
                       { title: 'Name', value: 'ssoUser.displayName' },
                       { title: 'Roles', value: 'roles' },
-                      { title: 'Email', value: 'ssoUser.email' }
+                      { title: 'Email', value: 'ssoUser.email' },
                     ]"
                   >
-                    <template v-slot:no-data>
-                      <v-alert type="info">You have no users in this tenancy.</v-alert>
+                    <template #no-data>
+                      <v-alert type="info"
+                        >You have no users in this tenancy.</v-alert
+                      >
                     </template>
                     <template #item.roles="{ item }">
-                      <v-chip v-for="role in item.roles" :key="role.id" color="primary" class="mr-2">
+                      <v-chip
+                        v-for="role in item.roles"
+                        :key="role.id"
+                        color="primary"
+                        class="mr-2"
+                      >
                         {{ role.name }}
                       </v-chip>
                     </template>
@@ -211,28 +235,40 @@ fetchTenantRoles();
                     :headers="[
                       { title: 'First Name', value: 'firstName' },
                       { title: 'Last Name', value: 'lastName' },
-                      { title: 'Email', value: 'email' }
+                      { title: 'Email', value: 'email' },
                     ]"
                     :loading="loadingSearchResults"
                     show-select
                     return-object
                     select-strategy="single"
                   >
-                    <template v-slot:headers="{ columns, isSorted, getSortIcon, toggleSort }">
-                        <tr>
-                            <template v-for="column in columns" :key="column.key">
-                            <th>
-                                <span class="mr-2 cursor-pointer" @click="() => toggleSort(column)">{{ column.title }}</span>
-                                <template v-if="isSorted(column)">
-                                <v-icon :icon="getSortIcon(column)"></v-icon>
-                                </template>
-                                <v-icon v-if="column.removable" icon="$close" @click="() => remove(column.key)"></v-icon>
-                            </th>
+                    <template
+                      #headers="{ columns, isSorted, getSortIcon, toggleSort }"
+                    >
+                      <tr>
+                        <template v-for="column in columns" :key="column.key">
+                          <th>
+                            <span
+                              class="mr-2 cursor-pointer"
+                              @click="() => toggleSort(column)"
+                              >{{ column.title }}</span
+                            >
+                            <template v-if="isSorted(column)">
+                              <v-icon :icon="getSortIcon(column)"></v-icon>
                             </template>
-                        </tr>
+                            <v-icon
+                              v-if="column.removable"
+                              icon="$close"
+                              @click="() => remove(column.key)"
+                            ></v-icon>
+                          </th>
+                        </template>
+                      </tr>
                     </template>
-                    <template v-slot:no-data>
-                      <v-alert type="info">You have not searched for any users yet</v-alert>
+                    <template #no-data>
+                      <v-alert type="info"
+                        >You have not searched for any users yet</v-alert
+                      >
                     </template>
                   </v-data-table>
                 </v-col>
@@ -242,7 +278,9 @@ fetchTenantRoles();
               <v-row v-if="selectedUser">
                 <v-col cols="12">
                   <h3>Add a user to this Tenancy</h3>
-                  <p>1. Search for a user based on the selection criteria below:</p>
+                  <p>
+                    1. Search for a user based on the selection criteria below:
+                  </p>
                 </v-col>
               </v-row>
               <v-row>
@@ -251,9 +289,9 @@ fetchTenantRoles();
                     v-model="searchOption"
                     label="Search by name or email"
                     :items="[
-                      { title: 'First Name', key: 'firstName' }, 
-                      { title: 'Last Name', key: 'lastName' }, 
-                      { title: 'Email', key: 'email'},
+                      { title: 'First Name', key: 'firstName' },
+                      { title: 'Last Name', key: 'lastName' },
+                      { title: 'Email', key: 'email' },
                     ]"
                     item-title="title"
                     item-value="key"
@@ -270,7 +308,8 @@ fetchTenantRoles();
                   <v-btn
                     :disabled="!searchOption || !searchText"
                     @click="searchUsers"
-                  >Search</v-btn>
+                    >Search</v-btn
+                  >
                 </v-col>
               </v-row>
 
@@ -284,10 +323,9 @@ fetchTenantRoles();
                     item-title="description"
                     item-value="name"
                   ></v-select>
-                  <v-btn
-                    :disabled="!selectedRole"
-                    @click="addUserToTenancy"
-                  >Add User</v-btn>
+                  <v-btn :disabled="!selectedRole" @click="addUserToTenancy"
+                    >Add User</v-btn
+                  >
                 </v-col>
               </v-row>
             </v-container>
@@ -307,19 +345,33 @@ fetchTenantRoles();
     </v-container>
 
     <!-- Delete Tenancy Dialog -->
-    <v-dialog v-model="deleteDialogVisible" persistent dismissable max-width="500px">
+    <v-dialog
+      v-model="deleteDialogVisible"
+      persistent
+      dismissable
+      max-width="500px"
+    >
       <v-card color="red-lighten-4">
         <v-card-title>
-            <v-icon color="red" icon="mdi-alert-circle-outline" size="x-small" />
-            Delete this Tenancy?
-            <v-icon class="float-right" icon="mdi-close" @click="deleteDialogVisible = false" />
+          <v-icon color="red" icon="mdi-alert-circle-outline" size="x-small" />
+          Delete this Tenancy?
+          <v-icon
+            class="float-right"
+            icon="mdi-close"
+            @click="deleteDialogVisible = false"
+          />
         </v-card-title>
         <v-card-text>
-            All users, roles and permissions related to this tenancy will be permanently deleted.
+          All users, roles and permissions related to this tenancy will be
+          permanently deleted.
         </v-card-text>
         <v-card-actions>
-          <v-btn text @click="deleteDialogVisible = false">Keep Tenancy</v-btn>
-          <v-btn color="red" variant="outlined" @click="deleteTenancy">Delete Tenancy</v-btn>
+          <v-btn variant="text" @click="deleteDialogVisible = false"
+            >Keep Tenancy</v-btn
+          >
+          <v-btn color="red" variant="outlined" @click="deleteTenancy"
+            >Delete Tenancy</v-btn
+          >
         </v-card-actions>
       </v-card>
     </v-dialog>

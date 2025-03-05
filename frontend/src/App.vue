@@ -9,7 +9,11 @@ const alerts = alertService.state.alerts;
 <template>
   <v-app>
     <div v-for="alert in alerts" :key="alert.id" class="alert-container">
-      <v-alert :type="alert.type" closable @click="alertService.removeAlert(alert.id)">
+      <v-alert
+        :type="alert.type"
+        closable
+        @click="alertService.removeAlert(alert.id)"
+      >
         {{ alert.message }}
       </v-alert>
     </div>

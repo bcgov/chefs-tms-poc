@@ -7,12 +7,12 @@ const routes = [
   { path: '/', redirect: '/tenancies' },
   { path: '/tenancies', component: Tenancies },
   { path: '/roles', component: Roles },
-  { path: '/tenancies/:id', component: ManageTenancy, props: true } // Add this new route
+  { path: '/tenancies/:id', component: ManageTenancy, props: true }, // Add this new route
 ];
 
 const router = createRouter({
   history: createWebHistory(),
-  routes
+  routes,
 });
 
 export default router;

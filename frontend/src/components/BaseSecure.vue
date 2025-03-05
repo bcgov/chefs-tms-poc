@@ -1,9 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useRouter } from 'vue-router';
 import { isLoggedIn as checkIsLoggedIn, login } from '../services/keycloak';
 
-const router = useRouter();
 const isAuthenticated = ref(false);
 
 onMounted(() => {

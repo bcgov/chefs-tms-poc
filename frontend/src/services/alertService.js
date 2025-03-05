@@ -13,7 +13,7 @@ const addAlert = (message, type = 'success') => {
 };
 
 const removeAlert = (id) => {
-  const index = state.alerts.findIndex(alert => alert.id === id);
+  const index = state.alerts.findIndex((alert) => alert.id === id);
   if (index !== -1) {
     state.alerts.splice(index, 1);
   }

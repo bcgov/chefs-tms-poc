@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite'
-import vue from '@vitejs/plugin-vue'
+import Vue from '@vitejs/plugin-vue';
+import eslint from 'vite-plugin-eslint';
+import vuetify from 'vite-plugin-vuetify';
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue()],
+  plugins: [Vue(), vuetify(), eslint()],
   server: {
     proxy: {
       '/api': {
