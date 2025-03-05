@@ -25,13 +25,16 @@ const handleLogout = () => {
 
 <template>
   <v-app-bar elevation="1">
-    <v-toolbar-title>Tenant Manager</v-toolbar-title>
+    <v-toolbar-title
+      ><img src="/BCID_H_RGB_pos.svg" alt="Logo" class="logo" />Tenant
+      Manager</v-toolbar-title
+    >
     <v-spacer></v-spacer>
     <template #append>
       <!-- Display user info and logout button if logged in -->
       <div v-if="isLoggedIn">
         <v-icon icon="mdi-account-outline" size="x-large"></v-icon>
-        <span>{{ userInfo?.displayName }} | </span>
+        <span>{{ userInfo?.displayName }}</span>
         <v-btn @click="handleLogout">Logout</v-btn>
       </div>
     </template>
@@ -39,10 +42,15 @@ const handleLogout = () => {
 </template>
 
 <style scoped>
-/* Scoped styles for the header */
-header {
+/* Style for logo and header elements */
+.logo {
+  vertical-align: middle;
+  height: 40px; /* Adjust as needed */
+  margin-right: 8px; /* Space between logo and text */
+}
+
+.v-toolbar-title {
   display: flex;
-  justify-content: space-between;
   align-items: center;
 }
 </style>
