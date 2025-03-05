@@ -20,7 +20,7 @@ export class SSOUser {
     @Column({ type: 'varchar', length: 50, name: 'display_name' })
     displayName: string
 
-    @Column({ type: 'varchar', length: 15, name: 'user_name' })
+    @Column({ type: 'varchar', length: 15, name: 'user_name', nullable: true })
     userName: string
 
     @Column({ type: 'varchar', length: 100, name: 'email', unique: true})
