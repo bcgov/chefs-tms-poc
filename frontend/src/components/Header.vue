@@ -20,7 +20,7 @@ const handleLogout = () => {
 
 <template>
   <v-app-bar elevation="1">
-    <v-toolbar-title>My Application</v-toolbar-title>
+    <v-toolbar-title>Tenant Manager</v-toolbar-title>
     <v-spacer></v-spacer>
     <template #append>
       <div v-if="isLoggedIn">
