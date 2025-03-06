@@ -1,0 +1,33 @@
+replicaCount: 1
+
+image:
+  repository: ""
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 4173
+
+env:
+  - name: VITE_KEYCLOAK_URL
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_KEYCLOAK_URL
+  - name: VITE_KEYCLOAK_REALM
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_KEYCLOAK_REALM
+  - name: VITE_KEYCLOAK_CLIENT_ID
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_KEYCLOAK_CLIENT_ID
+  - name: VITE_KEYCLOAK_LOGOUT_URL
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_KEYCLOAK_LOGOUT_URL

@@ -1,0 +1,4 @@
+apiVersion: v2
+name: tms-frontend
+description: A Helm chart for deploying the tms-frontend app
+version: 0.1.0
