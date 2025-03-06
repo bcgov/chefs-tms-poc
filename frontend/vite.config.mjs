@@ -6,19 +6,18 @@ import vuetify from 'vite-plugin-vuetify';
 
 // https://vite.dev/config/
 export default defineConfig({
+  preview: {
+    allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(','),
+  },
   plugins: [Vue(), vuetify(), eslint()],
   resolve: {
     alias: {
       '~': resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:4144',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
+  define: {
+    'process.env': {
+      VITE_BACKEND_API_URL: process.env.VITE_BACKEND_API_URL,
     },
   },
 });

@@ -4,12 +4,17 @@ metadata:
   name: {{ include "tms-frontend.fullname" . }}
   labels:
     {{- include "tms-frontend.labels" . | nindent 4 }}
+  annotations:
+    openshift.io/host.generated: 'true'
 spec:
+  path: /
   to:
     kind: Service
     name: {{ include "tms-frontend.fullname" . }}
+    weight: 100
   port:
-    targetPort: 80
+    targetPort: {{ .Values.service.targetPort }}
   tls:
     termination: edge
+    insecureEdgeTerminationPolicy: Redirect
   wildcardPolicy: None

@@ -4,7 +4,9 @@ import { getUser } from '~/services/keycloak';
 import notificationService from '~/utils/notificationService';
 
 // Create an instance of axios for user service
-const userService = axios.create();
+const userService = axios.create({
+  baseURL: process.env.VITE_BACKEND_API_URL,
+});
 
 /**
  * Gets the tenancies of the current user.
@@ -15,7 +17,7 @@ export const getUserTenants = async () => {
   if (user && user.ssoUserId) {
     try {
       const response = await userService.get(
-        `/api/v1/users/${user.ssoUserId}/tenants`,
+        `/users/${user.ssoUserId}/tenants`,
       );
       return response.data;
     } catch (error) {
@@ -44,12 +46,9 @@ export const getUserTenants = async () => {
  */
 export const searchIdirUsers = async (params) => {
   try {
-    const response = await userService.get(
-      `/api/v1/users/bcgovssousers/idir/search`,
-      {
-        params,
-      },
-    );
+    const response = await userService.get(`/users/bcgovssousers/idir/search`, {
+      params,
+    });
     return response.data.data;
   } catch (error) {
     logError(

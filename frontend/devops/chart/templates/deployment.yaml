@@ -11,6 +11,8 @@ spec:
       {{- include "tms-frontend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
+      annotations:
+        redeployTimestamp: "{{ .Release.Time }}"
       labels:
         {{- include "tms-frontend.selectorLabels" . | nindent 8 }}
     spec:
@@ -25,6 +27,9 @@ spec:
                 secretKeyRef:
                   name: {{ .valueFrom.secretKeyRef.name }}
                   key: {{ .valueFrom.secretKeyRef.key }}
+            {{- else }}
+            - name: {{ .name }}
+              value: {{ .value }}
             {{- end }}
           ports:
             - containerPort: {{ .Values.service.targetPort }}

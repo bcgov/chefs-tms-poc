@@ -3,7 +3,9 @@ import { logError } from '~/plugins/consolePlugin';
 import notificationService from '~/utils/notificationService';
 
 // Create an instance of axios for tenant service
-const tenantService = axios.create();
+const tenantService = axios.create({
+  baseURL: process.env.VITE_BACKEND_API_URL,
+});
 
 /**
  * Creates a new tenancy.
@@ -12,7 +14,7 @@ const tenantService = axios.create();
  */
 export const createTenancy = async (tenancy) => {
   try {
-    const response = await tenantService.post(`/api/v1/tenants`, tenancy);
+    const response = await tenantService.post(`/tenants`, tenancy);
     return response.data.data.tenant;
   } catch (error) {
     logError(
@@ -31,7 +33,7 @@ export const createTenancy = async (tenancy) => {
  */
 export const getUserTenants = async (userId) => {
   try {
-    const response = await tenantService.get(`/api/v1/users/${userId}/tenants`);
+    const response = await tenantService.get(`/users/${userId}/tenants`);
     return response.data.data.users;
   } catch (error) {
     logError(
@@ -53,9 +55,7 @@ export const getUserTenants = async (userId) => {
  */
 export const getTenantUsers = async (tenancyId) => {
   try {
-    const response = await tenantService.get(
-      `/api/v1/tenants/${tenancyId}/users`,
-    );
+    const response = await tenantService.get(`/tenants/${tenancyId}/users`);
     return response.data.data.users;
   } catch (error) {
     logError(
@@ -74,9 +74,7 @@ export const getTenantUsers = async (tenancyId) => {
  */
 export const getTenantRoles = async (tenancyId) => {
   try {
-    const response = await tenantService.get(
-      `/api/v1/tenants/${tenancyId}/roles`,
-    );
+    const response = await tenantService.get(`/tenants/${tenancyId}/roles`);
     return response.data.data.roles;
   } catch (error) {
     logError(
@@ -97,7 +95,7 @@ export const getTenantRoles = async (tenancyId) => {
 export const getTenantUserRoles = async (tenancyId, userId) => {
   try {
     const response = await tenantService.get(
-      `/api/v1/tenants/${tenancyId}/users/${userId}/roles`,
+      `/tenants/${tenancyId}/users/${userId}/roles`,
     );
     return response.data.data.roles;
   } catch (error) {
@@ -127,7 +125,7 @@ export const addTenantUsers = async (tenancyId, user, roleId = null) => {
       request.role = { id: roleId };
     }
     const response = await tenantService.post(
-      `/api/v1/tenants/${tenancyId}/users`,
+      `/tenants/${tenancyId}/users`,
       request,
     );
     return response.data.data;
@@ -154,7 +152,7 @@ export const addTenantUsers = async (tenancyId, user, roleId = null) => {
 export const assignUserRoles = async (tenancyId, userId, roleId) => {
   try {
     const response = await tenantService.put(
-      `/api/v1/tenants/${tenancyId}/users/${userId}/roles/${roleId}`,
+      `/tenants/${tenancyId}/users/${userId}/roles/${roleId}`,
     );
     return response.data;
   } catch (error) {

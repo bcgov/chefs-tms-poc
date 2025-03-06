@@ -9,8 +9,8 @@ COPY . .
 
 # Set the necessary permissions
 RUN set -x \
-    && chmod -R 755 /opt/app-root/src/ \
-    && chown -R node:node /opt/app-root/src/
+    && chmod -R 777 /opt/app-root/src/ \
+    && chown -R $(whoami) /opt/app-root/src/
 
 # Install the dependencies
 RUN npm install

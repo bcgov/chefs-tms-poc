@@ -1,14 +1,17 @@
 replicaCount: 1
 
 image:
-  repository: ""
+  repository: image-registry.apps.silver.devops.gov.bc.ca/a191b5-tools/tms-frontend
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   type: ClusterIP
   port: 80
   targetPort: 4173
+
+allowedHosts: ""
+backendApiUrl: ""
 
 env:
   - name: VITE_KEYCLOAK_URL
@@ -31,3 +34,13 @@ env:
       secretKeyRef:
         name: tms-frontend-secrets
         key: VITE_KEYCLOAK_LOGOUT_URL
+  - name: VITE_ALLOWED_HOSTS
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_ALLOWED_HOSTS
+  - name: VITE_BACKEND_API_URL
+    valueFrom:
+      secretKeyRef:
+        name: tms-frontend-secrets
+        key: VITE_BACKEND_API_URL
