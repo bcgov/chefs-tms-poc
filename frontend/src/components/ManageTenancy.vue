@@ -48,7 +48,7 @@ const fetchTenantRoles = async () => {
     const response = await getTenantRoles(route.params.id);
     roles.value = response;
   } catch (error) {
-    this.$error(error);
+    this.$logError(error);
   }
 };
 
@@ -94,7 +94,7 @@ const searchUsers = async () => {
         })
         .filter((user) => user !== null);
     } catch (error) {
-      this.$error(error);
+      this.$logError(error);
     } finally {
       loadingSearchResults.value = false;
     }
@@ -123,7 +123,7 @@ const addUserToTenancy = async () => {
         'success',
       );
     } catch (error) {
-      this.$error(error);
+      this.$logError(error);
     } finally {
       searchResults.value = [];
       selectedUser.value = null;

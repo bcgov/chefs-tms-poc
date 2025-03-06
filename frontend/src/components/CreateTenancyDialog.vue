@@ -54,7 +54,7 @@ const addTenancy = async () => {
         'Failed to create new tenancy',
         'error',
       );
-      this.$error(error);
+      this.$logError(error);
     } finally {
       emit('close');
     }

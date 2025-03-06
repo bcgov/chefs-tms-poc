@@ -61,7 +61,7 @@ const fetchUserTenants = async () => {
     }
     tenancies.value = tcies;
   } catch (error) {
-    this.$error(error);
+    this.$logError(error);
   }
 };
 
