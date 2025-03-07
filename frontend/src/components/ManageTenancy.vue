@@ -13,6 +13,7 @@ const router = useRouter();
 
 // Initialize tenancies store and notification service
 const tenanciesStore = useTenanciesStore();
+const $error = inject('$error');
 const notificationService = inject('notificationService');
 const { tenancies } = storeToRefs(tenanciesStore);
 
@@ -48,7 +49,7 @@ const fetchTenantRoles = async () => {
     const response = await getTenantRoles(route.params.id);
     roles.value = response;
   } catch (error) {
-    this.$logError(error);
+    $error(error);
   }
 };
 
@@ -94,7 +95,7 @@ const searchUsers = async () => {
         })
         .filter((user) => user !== null);
     } catch (error) {
-      this.$logError(error);
+      $error(error);
     } finally {
       loadingSearchResults.value = false;
     }
@@ -123,7 +124,7 @@ const addUserToTenancy = async () => {
         'success',
       );
     } catch (error) {
-      this.$logError(error);
+      $error(error);
     } finally {
       searchResults.value = [];
       selectedUser.value = null;

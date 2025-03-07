@@ -15,6 +15,7 @@ const emit = defineEmits(['close']);
 
 // Initialize the tenancies store and inject the notification service
 const tenanciesStore = useTenanciesStore();
+const $error = inject('$error');
 const notificationService = inject('notificationService');
 
 // Reactive references for form fields and state
@@ -54,7 +55,7 @@ const addTenancy = async () => {
         'Failed to create new tenancy',
         'error',
       );
-      this.$logError(error);
+      $error(error);
     } finally {
       emit('close');
     }

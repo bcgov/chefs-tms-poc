@@ -1,7 +1,7 @@
 <script setup>
 // Import necessary functions and refs from Vue, Pinia, and Vue Router
 import { storeToRefs } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useTenanciesStore } from '~/stores/tenancies';
 import { ROLES } from '~/utils/constants';
@@ -11,6 +11,7 @@ import { getTenantUsers, getTenantUserRoles } from '~/services/tenantService';
 
 // Initialize tenancies store and router
 const tenanciesStore = useTenanciesStore();
+const $error = inject('$error');
 const router = useRouter();
 
 // Reactive references for dialog visibility and tenancies
@@ -61,7 +62,7 @@ const fetchUserTenants = async () => {
     }
     tenancies.value = tcies;
   } catch (error) {
-    this.$logError(error);
+    $error(error);
   }
 };
 

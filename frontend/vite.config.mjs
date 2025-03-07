@@ -3,8 +3,12 @@ import { resolve } from 'path';
 import Vue from '@vitejs/plugin-vue';
 import eslint from 'vite-plugin-eslint';
 import vuetify from 'vite-plugin-vuetify';
+import dotenv from 'dotenv';
+import dotenvExpand from 'dotenv-expand';
 
-// https://vite.dev/config/
+const myEnv = dotenv.config();
+dotenvExpand.expand(myEnv);
+
 export default defineConfig({
   preview: {
     allowedHosts: (process.env.VITE_ALLOWED_HOSTS || '').split(','),
@@ -13,11 +17,6 @@ export default defineConfig({
   resolve: {
     alias: {
       '~': resolve(__dirname, './src'),
-    },
-  },
-  define: {
-    'process.env': {
-      VITE_BACKEND_API_URL: process.env.VITE_BACKEND_API_URL,
     },
   },
 });

@@ -18,6 +18,9 @@ RUN npm install
 # Build the application for production
 RUN npm run build
 
+# Remove the .env file after build if it was copied
+RUN rm -f .env
+
 # Switch to the node user
 USER node
 

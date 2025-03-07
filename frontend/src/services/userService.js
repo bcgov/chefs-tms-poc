@@ -5,7 +5,8 @@ import notificationService from '~/utils/notificationService';
 
 // Create an instance of axios for user service
 const userService = axios.create({
-  baseURL: process.env.VITE_BACKEND_API_URL,
+  baseURL:
+    import.meta.env.VITE_BACKEND_API_URL || process.env.VITE_BACKEND_API_URL,
 });
 
 /**

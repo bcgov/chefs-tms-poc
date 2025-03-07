@@ -14,6 +14,8 @@ The Tenant Manager frontend will require some configuration. We will need to con
 | VITE_KEYCLOAK_REALM           | The realm in the keycloak instance | standard    |
 | VITE_KEYCLOAK_CLIENT_ID | The client id in the realm   | example-client-id                        |
 | VITE_KEYCLOAK_LOGOUT_URL | The logout URL   | https://dev.loginproxy.gov.bc.ca.auth/realms/standard/protocol/openid-connect/logout |
+| VITE_BACKEND_API_URL | The URL of the backend   | localhost:4144                        |
+| VITE_ALLOWED_HOSTS | The URL of the hosts for the front end   | localhost:4173,localhost5173 |
 
 ### Project setup
 
