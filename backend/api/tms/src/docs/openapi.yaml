@@ -238,17 +238,10 @@ components:
           maxLength: 100
           example: "Ministry of Natural Resources"
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/BasicUser'
 
-    User:
-      type: object
-      required:
-        - firstName
-        - lastName
-        - displayName
-        - userName
-        - ssoUserId
-        - email
+    BasicUser:
+      type: object    
       properties:
         firstName:
           type: string
@@ -285,6 +278,61 @@ components:
           description: The email address of the user.
           example: "shankar@gov.bc.ca"
 
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "fd33f1cef7ca4b19a71104d4ecf7066b"
+        createdDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"
+        updatedDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"  
+        ssoUser:
+          $ref: '#/components/schemas/SSOUser'
+
+    SSOUser:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "fd33f1cef7ca4b19a71104d4ecf7066b"
+        ssoUserId:
+          type: string
+          format: uuid
+          example: "fd33f1cef7ca4b19a71104d4ecf7066b"
+        firstName:
+          type: string
+          example: "Shankar"
+        lastName:
+          type: string
+          example: "Sethuraman"
+        displayName:
+          type: string
+          example: "Sethuraman, Shankar: JEDI: EX"
+        userName:
+          type: string
+          example: "SSETHURA"
+        email:
+          type: string
+          format: email
+          example: "shankar@gov.bc.ca"
+        createdDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"
+        updatedDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"  
+
+
     Role:
       type: object           
       properties:
@@ -319,7 +367,7 @@ components:
         - user
       properties:
         user:
-          $ref: '#/components/schemas/User'
+          $ref: '#/components/schemas/BasicUser'
         role:
           type: object
           description: Optional role for the user.
