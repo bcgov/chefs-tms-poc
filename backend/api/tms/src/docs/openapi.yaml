@@ -82,6 +82,25 @@ paths:
               schema:
                 $ref: '#/components/schemas/InternalServerErrorResponse'
 
+  /v1/users/{ssoUserId}/tenants:
+    get:
+      summary: Get tenants associated with a user
+      description: Retrieves a list of tenants associated with a user.
+      parameters:
+        - ssoUserId:
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique SSO user ID of the user.
+      responses:
+        '200':
+          description: List of tenants associated with the user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetUserTenantsResponse'
+
 components:
   schemas:
     CreateTenantRequest:
@@ -204,9 +223,31 @@ components:
           type: object
           properties:
             tenant:
-              $ref: '#/components/schemas/Tenant'
+              $ref: '#/components/schemas/TenantWithUsers'
 
     Tenant:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "f98cbbfb-b96c-4a40-a10b-c2a7e795022c"
+        name:
+          type: string
+          example: "New Tenant3"
+        ministryName:
+          type: string
+          example: "New Ministry"
+        createdDateTime:
+          type: string
+          format: date-time
+          example: "2025-03-11T03:01:23.697Z"
+        updatedDateTime:
+          type: string
+          format: date-time
+          example: "2025-03-11T03:01:23.697Z"
+
+    TenantWithUsers:
       type: object
       properties:
         id:
@@ -259,6 +300,17 @@ components:
           type: string
           description: A high-level error message.
           example: "Internal Server Error"
+
+    GetUserTenantsResponse:
+      type: object
+      properties:
+        data:
+          type: object
+          properties:
+            tenants:
+              type: array
+              items:
+                $ref: '#/components/schemas/Tenant'
 
     InternalServerErrorResponse:
        type: object
