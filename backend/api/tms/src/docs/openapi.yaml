@@ -212,8 +212,71 @@ paths:
             content:
               application/json:
                 schema:
-                  $ref: '#/components/schemas/InternalServerErrorResponse'                 
-                
+                  $ref: '#/components/schemas/InternalServerErrorResponse'         
+
+  /v1/tenants/{tenantId}/users/{tenantUserId}/roles/{roleId}:
+    put:
+      summary: Associate a role with a user in a tenant
+      description: Associates a role with a user in a tenant.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Tenant identifier.      
+        - name: tenantUserId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Tenant user ID - user ID for the tenant
+        - name: roleId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Role identifier.
+      responses:
+        '200':
+          description: Role successfully associated with the user in the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      role:
+                        $ref: '#/components/schemas/Role'
+          '400':
+            description: Invalid input (e.g., missing required fields, exceeding length limits).
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/BadRequestResponse'
+          '404':
+            description: Resource Not found (Tenant, User, Role etc).
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/NotFoundErrorResponse'
+          '409':
+            description: Conflict with existing resource - ex - the role is already added to a tenant
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ConflictErrorResponse'
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/InternalServerErrorResponse'         
+
 
 
 components:
