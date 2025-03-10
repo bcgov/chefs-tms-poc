@@ -99,7 +99,42 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/GetUserTenantsResponse'
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      tenants:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Tenant'
+
+  v1/tenants/{tenantId}/users:
+    get:
+      summary: Get users associated with a tenant
+      description: Retrieves a list of users associated with a tenant.
+      parameters:
+        - tenantId:
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the tenant.
+      responses:
+        '200':
+          description: List of users associated with the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
 
 components:
   schemas:
@@ -300,17 +335,6 @@ components:
           type: string
           description: A high-level error message.
           example: "Internal Server Error"
-
-    GetUserTenantsResponse:
-      type: object
-      properties:
-        data:
-          type: object
-          properties:
-            tenants:
-              type: array
-              items:
-                $ref: '#/components/schemas/Tenant'
 
     InternalServerErrorResponse:
        type: object
