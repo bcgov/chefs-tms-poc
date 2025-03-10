@@ -26,15 +26,55 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreateTenantResponse'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits) - general schema validation failure
+          description: Invalid input (e.g., missing required fields, exceeding length limits).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
         '500':
-          description: General Internal Service Error
+          description: Internal Server Error
           content:
-            application/json:              
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+
+  /v1/tenants/{tenantId}/users:
+    post:
+      summary: Add a user to a tenant
+      description: Adds a user to a tenant.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: The unique identifier of the tenant.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddUserToTenantRequest'
+      responses:
+        '201':
+          description: User successfully added to the tenant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AddUserToTenantResponse'
+        '400':
+          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
 
 components:
   schemas:
@@ -59,7 +99,7 @@ components:
           example: "Ministry of Natural Resources"
         user:
           $ref: '#/components/schemas/User'
-    
+
     User:
       type: object
       required:
@@ -97,14 +137,60 @@ components:
         ssoUserId:
           type: string
           description: The SSO user ID associated with the user.
-          format: guid
+          format: uuid
           example: "fd33f1cef7ca4b19a71104d4ecf7066b"
         email:
           type: string
           format: email
           description: The email address of the user.
           example: "shankar@gov.bc.ca"
-    
+
+    Role:
+      type: object           
+      properties:
+        id:
+          type: string
+          description: The role ID as set in the database.
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Name of the role
+          example: "CHEFS.SUBMITTER"
+        description:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Description of the role
+          example: "CHEFS submitter role"
+        createdDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"
+        updatedDateTime:
+          type: string
+          format: date-time
+          example: "2025-02-26T01:28:52.693Z"
+
+    AddUserToTenantRequest:
+      type: object
+      required:
+        - user
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        role:
+          type: object
+          description: Optional role for the user.
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "14c6bb48-54e2-4ce0-9bbd-af4982fff13b"
+          required:
+            - id
+
     CreateTenantResponse:
       type: object
       properties:
@@ -112,106 +198,78 @@ components:
           type: object
           properties:
             tenant:
-              type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
-                  example: "8d55b857-e9db-44b6-b7ea-654fbe2cc3be"
-                name:
-                  type: string
-                  example: "Roads Initiative"
-                ministryName:
-                  type: string
-                  example: "Ministry of Natural Resources"
-                createdDateTime:
-                  type: string
-                  format: date-time
-                  example: "2025-02-26T01:28:52.693Z"
-                updatedDateTime:
-                  type: string
-                  format: date-time
-                  example: "2025-02-26T01:28:52.693Z"
-                users:
-                  type: array
-                  items:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        description: "Tenant User ID of the user who created the tenant"
-                        format: uuid
-                        example: "c3f8deea-1a9e-4a65-b2bb-552b906d59c1"
-                      createdDateTime:
-                        type: string
-                        format: date-time
-                        example: "2025-02-26T01:28:52.693Z"
-                      updatedDateTime:
-                        type: string
-                        format: date-time
-                        example: "2025-02-26T01:28:52.693Z"
-                      ssoUser:
-                        type: object
-                        description: "Unique reference of the tenant user as configured in SSO"
-                        properties:
-                          id:
-                            type: string
-                            format: uuid
-                            example: "6ff38676-1e0b-4e54-ae86-a5a9df44cd2d"
-                          ssoUserId:
-                            type: string
-                            description: "Unique ID of this user in SSO. This ID will be the same for every login and across all tenants"
-                            format: uuid
-                            example: "fd33f1cef7ca4b19a71104d4ecf7066b"
-                          firstName:
-                            type: string
-                            example: "Shankar"
-                          lastName:
-                            type: string
-                            example: "Sethuraman"
-                          displayName:
-                            type: string
-                            example: "Sethuraman, Shankar: JEDI: EX"
-                          userName:
-                            type: string
-                            example: "SSETHURA"
-                          email:
-                            type: string
-                            format: email
-                            example: "shankar@gov.bc.ca"
-                          createdDateTime:
-                            type: string
-                            format: date-time
-                            example: "2025-02-26T00:39:42.892Z"
-                          updatedDateTime:
-                            type: string
-                            format: date-time
-                            example: "2025-02-26T00:39:42.892Z"
-    
-    ErrorResponse:
+              $ref: '#/components/schemas/Tenant'
+
+    Tenant:
       type: object
       properties:
-        error:
+        id:
           type: string
-          description: A human-readable error message.
-          example: "Invalid input: name must be between 3 and 100 characters."
-        code:
-          type: integer
-          description: HTTP status code.
-          example: 400
+          format: uuid
+          example: "f98cbbfb-b96c-4a40-a10b-c2a7e795022c"
+        name:
+          type: string
+          example: "New Tenant3"
+        ministryName:
+          type: string
+          example: "New Ministry"
+        createdDateTime:
+          type: string
+          format: date-time
+          example: "2025-03-11T03:01:23.697Z"
+        updatedDateTime:
+          type: string
+          format: date-time
+          example: "2025-03-11T03:01:23.697Z"
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
 
-    InternalServerErrorResponse:
+    AddUserToTenantResponse:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/User'
+        role:
+          $ref: '#/components/schemas/Role'
+
+    ErrorResponse:
       type: object
       properties:
         name:
           type: string
+          description: A brief description of the error.
           example: "Error occurred during tenant creation"
         message:
           type: string
-          example: "An error occurred creating a tenant"
+          description: A more detailed explanation of the error.
+          example: "This is my error message detail"
         httpResponseCode:
           type: integer
+          description: HTTP status code.
+          example: 400
+        errorMessage:
+          type: string
+          description: A high-level error message.
+          example: "Internal Server Error"
+
+    InternalServerErrorResponse:
+       type: object
+       properties:
+        name:
+          type: string
+          description: A brief description of the error.
+          example: "Error occurred during tenant creation"
+        message:
+          type: string
+          description: A more detailed explanation of the error.
+          example: "This is an error message"
+        httpResponseCode:
+          type: integer
+          description: HTTP status code.
           example: 500
         errorMessage:
           type: string
+          description: A high-level error message.
           example: "Internal Server Error"
