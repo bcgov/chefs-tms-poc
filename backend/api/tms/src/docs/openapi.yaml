@@ -37,6 +37,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerErrorResponse'
+    get:
+      summary: Get users associated with a tenant
+      description: Retrieves a list of users associated with a tenant.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the tenant.
+      responses:
+        '200':
+          description: List of users associated with the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
 
   /v1/tenants/{tenantId}/users:
     post:
@@ -69,6 +94,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequestResponse'
+        '400':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
         '409':
           description: Conflict with existing resource - ex - a user is already added to a tenant
           content:
@@ -87,7 +118,7 @@ paths:
       summary: Get tenants associated with a user
       description: Retrieves a list of tenants associated with a user.
       parameters:
-        - ssoUserId:
+        - name: ssoUserId
           in: path
           required: true
           schema:
@@ -109,20 +140,45 @@ paths:
                         items:
                           $ref: '#/components/schemas/Tenant'
 
-  v1/tenants/{tenantId}/users:
-    get:
-      summary: Get users associated with a tenant
-      description: Retrieves a list of users associated with a tenant.
+  /v1/tenants/{tenantId}/roles:    
+    post:
+      summary: Create a role for a tenant
+      description: Creates a new role for a tenant.
       parameters:
-        - tenantId:
+        - name: tenantId
           in: path
           required: true
           schema:
             type: string
           description: The unique identifier of the tenant.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: object
+                  description: Basic role details
+                  properties:
+                    name:
+                      type: string
+                      minLength: 1
+                      maxLength: 100
+                      description: Name of the role to be created.
+                      example: CHEFS.Reviewer
+                    description:
+                      minLength: 1
+                      maxLength: 255
+                      description: Description of the role to be created.
+                      example: CHEFS reviewer Role
+                  required:
+                    - name
+                    - description
       responses:
-        '200':
-          description: List of users associated with the tenant.
+        '201':
+          description: Role successfully created.
           content:
             application/json:
               schema:
@@ -131,10 +187,34 @@ paths:
                   data:
                     type: object
                     properties:
-                      users:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/User'
+                      role:
+                        $ref: '#/components/schemas/Role'
+          '400':
+            description: Invalid input (e.g., missing required fields, exceeding length limits).
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/BadRequestResponse'
+          '404':
+            description: Resource Not found (Tenant, User, Role etc).
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/NotFoundErrorResponse'
+          '409':
+            description: Conflict with existing resource - ex - the role is already added to a tenant
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ConflictErrorResponse'
+          '500':
+            description: Internal Server Error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/InternalServerErrorResponse'                 
+                
+
 
 components:
   schemas:
@@ -375,3 +455,23 @@ components:
           type: string
           description: A high-level error message.
           example: "Conflict"
+
+    NotFoundErrorResponse:
+       type: object
+       properties:
+        name:
+          type: string
+          description: A brief description of the error.
+          example: "Tenant Not Found"
+        message:
+          type: string
+          description: A more detailed explanation of the error.
+          example: "Tenant Not Found: 21eb86-9cf5-40a3-9a0d-81b551f50a2f"
+        httpResponseCode:
+          type: integer
+          description: HTTP status code.
+          example: 404
+        errorMessage:
+          type: string
+          description: A high-level error message.
+          example: "Not Found"
