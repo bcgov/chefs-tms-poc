@@ -30,7 +30,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/BadRequestResponse'
         '500':
           description: Internal Server Error
           content:
@@ -68,7 +68,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/BadRequestResponse'
+        '409':
+          description: Conflict with existing resource - ex - a user is already added to a tenant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConflictErrorResponse'
         '500':
           description: Internal Server Error
           content:
@@ -234,7 +240,7 @@ components:
         role:
           $ref: '#/components/schemas/Role'
 
-    ErrorResponse:
+    BadRequestResponse:
       type: object
       properties:
         name:
@@ -273,3 +279,23 @@ components:
           type: string
           description: A high-level error message.
           example: "Internal Server Error"
+
+    ConflictErrorResponse:
+       type: object
+       properties:
+        name:
+          type: string
+          description: A brief description of the error.
+          example: "Error occurred adding user to the tenant"
+        message:
+          type: string
+          description: A more detailed explanation of the error.
+          example: "User is already added to this tenant: 8821eb86-9cf5-40a3-9a0d-81b551f50a2f"
+        httpResponseCode:
+          type: integer
+          description: HTTP status code.
+          example: 409
+        errorMessage:
+          type: string
+          description: A high-level error message.
+          example: "Conflict"
