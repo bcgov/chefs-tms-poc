@@ -183,4 +183,20 @@ export class TMSController {
         }
     }
 
+    public async getRolesForSSOUser(req:Request, res:Response) {    
+        try {
+            const roles = await this.tmsService.getRolesForSSOUser(req)
+            return res.status(200).send(roles)
+        }
+        catch(error) {
+            console.log(error)
+            if (error instanceof NotFoundError) {
+                this.errorHandler.generalError(res,"Error occurred getting roles for SSO user", error.message, error.statusCode, "Not Found")
+            }
+            else {    
+                this.errorHandler.generalError(res,"Error occurred getting roles for SSO user", error.message, 500, "Internal Server Error")
+            } 
+        }
+    }
+
 }

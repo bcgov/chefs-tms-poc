@@ -111,6 +111,15 @@ export class TMSService {
         }
     }
 
+    public async getRolesForSSOUser(req:Request) {
+        const roles = await this.tmsRepository.getRolesForSSOUser(req)
+        return {
+            data: {
+                roles
+            }
+        }
+    }
+
     private async getToken() {
         try {
             const response = await axios.post(

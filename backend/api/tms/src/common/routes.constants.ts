@@ -11,4 +11,5 @@ export class RoutesConstants {
     public static UNASSIGN_USER_ROLES = '/v1/tenants/:tenantId/users/:tenantUserId/roles/:roleId'
     public static SEARCH_BC_GOV_IDIR_USERS = '/v1/users/bcgovssousers/idir/search'
     public static GET_TENANT = '/v1/tenants/:tenantId'
+    public static GET_ROLES_FOR_SSO_USER = '/v1/tenants/:tenantId/ssousers/:ssoUserId/roles'
   }

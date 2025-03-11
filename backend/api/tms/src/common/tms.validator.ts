@@ -106,6 +106,13 @@ export default {
             expand: Joi.string().optional()
             .pattern(/^(tenantUserRoles|roles)(,(tenantUserRoles|roles))?$/)
         }).optional()
+    },
+
+    getRolesForSSOUser: {
+        params: Joi.object({
+            tenantId: Joi.string().guid().required(),
+            ssoUserId: Joi.string().required()
+        }).options({abortEarly:false,convert:false})
     }
 
 }

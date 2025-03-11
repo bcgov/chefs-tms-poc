@@ -281,6 +281,31 @@ export class TMSRepository {
         return tenant
     }
 
+    public async getRolesForSSOUser(req:Request) {
+        const tenantId:string = req.params.tenantId
+        const ssoUserId:string = req.params.ssoUserId
+
+        if(! await this.checkIfTenantExists(tenantId)) {
+            throw new NotFoundError("Tenant Not Found: "+tenantId)   
+        }
+        
+        const roles:Role[] = await this.getRolesForSSOUserAndTenant(tenantId,ssoUserId)
+        return roles
+    }
+
+    public async getRolesForSSOUserAndTenant(tenantId:string,ssoUserId:string) {
+        const roles:Role[] = await this.manager
+            .createQueryBuilder(Role, "role")
+            .innerJoin("role.tenantUserRoles", "tenantUserRole")
+            .innerJoin("tenantUserRole.tenantUser", "tenantUser")
+            .innerJoin("tenantUser.tenant", "tenant")
+            .innerJoin("tenantUser.ssoUser", "ssoUser")
+            .where("tenant.id = :tenantId", { tenantId })
+            .andWhere("ssoUser.ssoUserId = :ssoUserId", { ssoUserId })
+            .getMany();
+        return roles
+    }
+
     public async getTenantUserRole(tenantId:string,tenantUserId:string,roleId:string)  {
         const tenantUserRole:TenantUserRole = await this.manager
             .createQueryBuilder(TenantUserRole, "tenantUserRole")
