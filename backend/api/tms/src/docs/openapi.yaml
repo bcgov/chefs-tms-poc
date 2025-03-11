@@ -593,25 +593,25 @@ components:
           description: The first name of the user.
           minLength: 1
           maxLength: 50
-          example: "Shankar"
+          example: "John"
         lastName:
           type: string
           description: The last name of the user.
           minLength: 1
           maxLength: 50
-          example: "Sethuraman"
+          example: "Smith"
         displayName:
           type: string
           description: The display name of the user in full.
           minLength: 1
           maxLength: 50
-          example: "Sethuraman, Shankar: JEDI: EX"
+          example: "Smith, John: JEDI: EX"
         userName:
           type: string
           description: The IDIR username of the user.
           minLength: 1
           maxLength: 50
-          example: "SSETHURA"
+          example: "JSMITH1"
         ssoUserId:
           type: string
           description: The SSO user ID associated with the user.
@@ -621,7 +621,7 @@ components:
           type: string
           format: email
           description: The email address of the user.
-          example: "shankar@gov.bc.ca"
+          example: "John@gov.bc.ca"
 
     User:
       type: object
@@ -654,20 +654,20 @@ components:
           example: "fd33f1cef7ca4b19a71104d4ecf7066b"
         firstName:
           type: string
-          example: "Shankar"
+          example: "John"
         lastName:
           type: string
-          example: "Sethuraman"
+          example: "Smith"
         displayName:
           type: string
-          example: "Sethuraman, Shankar: JEDI: EX"
+          example: "Smith, John: JEDI: EX"
         userName:
           type: string
-          example: "SSETHURA"
+          example: "JSMITH1"
         email:
           type: string
           format: email
-          example: "shankar@gov.bc.ca"
+          example: "John@gov.bc.ca"
         createdDateTime:
           type: string
           format: date-time
