@@ -37,31 +37,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InternalServerErrorResponse'
-    get:
-      summary: Get users associated with a tenant
-      description: Retrieves a list of users associated with a tenant.
-      parameters:
-        - name: tenantId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: The unique identifier of the tenant.
-      responses:
-        '200':
-          description: List of users associated with the tenant.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  data:
-                    type: object
-                    properties:
-                      users:
-                        type: array
-                        items:
-                          $ref: '#/components/schemas/User'
+
 
   /v1/tenants/{tenantId}/users:
     post:
@@ -106,6 +82,50 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ConflictErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
+
+    get:
+      summary: Get users associated with a tenant
+      description: Retrieves a list of users associated with a tenant.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the tenant.
+      responses:
+        '200':
+          description: List of users associated with the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      users:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/User'
+        '400':
+          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '400':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
         '500':
           description: Internal Server Error
           content:
