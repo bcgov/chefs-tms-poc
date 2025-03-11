@@ -214,6 +214,50 @@ paths:
                 schema:
                   $ref: '#/components/schemas/InternalServerErrorResponse'         
 
+    get:
+      summary: Get all roles for a tenant
+      description: Retrieves a list of all roles for a tenant.
+      parameters:
+        - name: tenantId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: The unique identifier of the tenant.
+      responses:
+        '200':
+          description: List of all roles for the tenant.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      roles:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Role'
+        '400':
+          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '404':
+          description: Resource Not found (Tenant, User, Role etc).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse' 
+
   /v1/tenants/{tenantId}/users/{tenantUserId}/roles/{roleId}:
     put:
       summary: Associate a role with a user in a tenant
