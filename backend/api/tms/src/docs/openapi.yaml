@@ -26,7 +26,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreateTenantResponse'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -65,7 +65,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/AddUserToTenantResponse'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -115,12 +115,12 @@ paths:
                         items:
                           $ref: '#/components/schemas/User'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/BadRequestResponse'
-        '400':
+        '404':
           description: Tenant not found.
           content:
             application/json:
@@ -159,6 +159,24 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Tenant'
+        '400':
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BadRequestResponse'
+        '404':
+          description: Tenant not found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundErrorResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InternalServerErrorResponse'
 
   /v1/tenants/{tenantId}/roles:    
     post:
@@ -210,7 +228,7 @@ paths:
                       role:
                         $ref: '#/components/schemas/Role'
           '400':
-            description: Invalid input (e.g., missing required fields, exceeding length limits).
+            description: Invalid input (request fields, parameters, query parameters, schema violations).
             content:
               application/json:
                 schema:
@@ -260,7 +278,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/Role'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -317,7 +335,7 @@ paths:
                       role:
                         $ref: '#/components/schemas/Role'
           '400':
-            description: Invalid input (e.g., missing required fields, exceeding length limits).
+            description: Invalid input (request fields, parameters, query parameters, schema violations).
             content:
               application/json:
                 schema:
@@ -366,7 +384,7 @@ paths:
         '204':
           description: No Content 
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -423,7 +441,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/Role'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -491,7 +509,7 @@ paths:
                             items:
                               $ref: '#/components/schemas/Role'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
@@ -543,7 +561,7 @@ paths:
                         items:
                           $ref: '#/components/schemas/Role'
         '400':
-          description: Invalid input (e.g., missing required fields, exceeding length limits).
+          description: Invalid input (request fields, parameters, query parameters, schema violations).
           content:
             application/json:
               schema:
