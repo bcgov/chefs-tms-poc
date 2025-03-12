@@ -477,7 +477,7 @@ paths:
           description: Optional query parameter to expand roles or tenant user roles
           schema:
             type: string
-            enum: [roles, tenantUserRoles]
+            enum: [roles, tenantUserRoles, 'roles,tenantUserRoles']
       responses:
         "200":
           description: Successful response with tenant details
