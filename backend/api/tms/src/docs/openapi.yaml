@@ -795,19 +795,52 @@ components:
         name:
           type: string
           description: A brief description of the error.
-          example: "Error occurred during tenant creation"
+          example: "ValidationError"
         message:
           type: string
           description: A more detailed explanation of the error.
-          example: "This is my error message detail"
-        httpResponseCode:
+          example: "ValidationFailed"
+        statusCode:
           type: integer
           description: HTTP status code.
           example: 400
-        errorMessage:
+        error:
           type: string
           description: A high-level error message.
-          example: "Internal Server Error"
+          example: "Bad Request"
+        body:
+          type: array
+          items:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "\"name\" is required"
+              path:
+                type: array
+                items:
+                  type: string
+                example: ["name"]
+              type:
+                type: string
+                example: "any.required"
+              context:
+                type: object
+                properties:
+                  label:
+                    type: string
+                    example: "name"
+                  key:
+                    type: string
+                    example: "name"
+                  child:
+                    type: string
+                    example: "name1"
+                    nullable: true
+                  value:
+                    type: string
+                    example: "Tenant 1"
+                    nullable: true
 
     InternalServerErrorResponse:
        type: object
