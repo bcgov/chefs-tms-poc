@@ -73,15 +73,19 @@ afterAll(async () => {
   }
 });
 
-describe('Health Check API', () => {
-  it('should return 200 OK and healthy status', async () => {
-    const response = await request(testApp).get('/v1/health');
-    expect(response.status).toBe(200);
-    expect(response.body).toMatchObject({ apiStatus: 'Healthy' });
-  });
-});
+console.log('Running tests...')
 
-let tenantId:string
+let tenantId:string, roleId:string, tenantUserId:string
+let initialSSOUserId:string = 'fd33f1cef7ca4b19a71104d4ecf7066b'
+let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
+
+  describe('Health Check API', () => {
+    it('should return 200 OK and healthy status', async () => {
+      const response = await request(testApp).get('/v1/health');
+      expect(response.status).toBe(200);
+      expect(response.body).toMatchObject({ apiStatus: 'Healthy' });
+    });
+  });
 
   describe('Create Tenant', () => {
     it('should return basic tenant 201 Created', async () => {      
@@ -93,7 +97,7 @@ let tenantId:string
           "lastName": "Smith",
           "displayName": "Smith, John: MIN: EX",
           "userName": "SMITHJ1",
-          "ssoUserId": "fd33f1cef7ca4b19a71104d4ecf7066b",
+          "ssoUserId": initialSSOUserId,
           "email": "john.smith@gov.bc.ca"
         }
       }); 
@@ -101,14 +105,7 @@ let tenantId:string
       expect(response.body.data.tenant).toMatchObject({ name: "Test Tenant" });
       expect(response.body.data.tenant.users[0].ssoUser).toMatchObject({ ssoUserId: "fd33f1cef7ca4b19a71104d4ecf7066b" });
       tenantId = response.body.data.tenant.id;
-    });
-  });
-
-  describe( 'Get Tenant', () => {
-    it('should return a basic tenant with 200', async () => {
-      const response = await request(testApp).get(`/v1/tenants/${tenantId}`);
-      expect(response.status).toBe(200);
-      expect(response.body.data.tenant).toMatchObject({ id: tenantId });
+      tenantUserId = response.body.data.tenant.users[0].id
     });
   });
 
@@ -120,12 +117,12 @@ let tenantId:string
           "lastName": "Raccoon",
           "displayName": "Raccoon, Rocket: MIN: EX",
           "userName": "RACCOOR",
-          "ssoUserId": "ad43f1cef7ca4b19a71104d4ecf7066d",
+          "ssoUserId": additionalSSOUserId,
           "email": "rocket.raccoon@gov.bc.ca"
         }
       }); 
       expect(response.status).toBe(201);            
-      expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: "ad43f1cef7ca4b19a71104d4ecf7066d" });      
+      expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: additionalSSOUserId });      
     });
   });
 
@@ -138,6 +135,42 @@ let tenantId:string
       }
       }); 
       expect(response.status).toBe(201);            
-      expect(response.body.data.role).toMatchObject({ name: "LOB.CUSTOM_ROLE" });      
+      expect(response.body.data.role).toMatchObject({ name: "LOB.CUSTOM_ROLE" });
+      roleId = response.body.data.role.id;
+    });
+  });
+
+  describe( 'Get Tenant', () => {
+    it('should return a basic tenant - 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}`);
+      expect(response.status).toBe(200);
+      expect(response.body.data.tenant).toMatchObject({ id: tenantId });
+    });
+  });
+
+  describe( 'Get Users for a tenant', () => {
+    it('should return array of users for the tenant with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}/users`);
+     expect(response.status).toBe(200);
+     expect(response.body.data.users).toBeDefined();
+     expect(response.body.data.users).toHaveLength(2)
+     expect(response.body.data.users).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ 
+          ssoUser: expect.objectContaining({ ssoUserId: initialSSOUserId }) 
+        }),
+        expect.objectContaining({ 
+          ssoUser: expect.objectContaining({ ssoUserId: additionalSSOUserId }) 
+        })
+      ])
+    );
+    });
+  });
+
+  describe( 'Get Tenants for SSO User', () => {
+    it('should return array of tenants for a sso user id with 200', async () => {
+      const response = await request(testApp).get(`/v1/users/${initialSSOUserId}/tenants`);
+      expect(response.status).toBe(200);
+      expect(response.body.data.tenants[0]).toMatchObject({ id: tenantId });
     });
   });
