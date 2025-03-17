@@ -83,7 +83,7 @@ describe('Health Check API', () => {
 
 let tenantId:string
 
-describe('Create Tenant API', () => {
+  describe('Create Tenant', () => {
     it('should return basic tenant 201 Created', async () => {      
       const response = await request(testApp).post('/v1/tenants').send({
         "name": "Test Tenant",
@@ -104,10 +104,27 @@ describe('Create Tenant API', () => {
     });
   });
 
-  describe( 'Get Tenant API', () => {
+  describe( 'Get Tenant', () => {
     it('should return a basic tenant with 200', async () => {
       const response = await request(testApp).get(`/v1/tenants/${tenantId}`);
       expect(response.status).toBe(200);
       expect(response.body.data.tenant).toMatchObject({ id: tenantId });
+    });
+  });
+
+  describe('Add user to a tenant', () => {
+    it('should return basic user created and added to tenant - 201', async () => {      
+      const response = await request(testApp).post(`/v1/tenants/${tenantId}/users`).send({
+        "user": {
+          "firstName": "Rocket",
+          "lastName": "Raccoon",
+          "displayName": "Raccoon, Rocket: MIN: EX",
+          "userName": "RACCOOR",
+          "ssoUserId": "ad43f1cef7ca4b19a71104d4ecf7066d",
+          "email": "rocket.raccoon@gov.bc.ca"
+        }
+      }); 
+      expect(response.status).toBe(201);            
+      expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: "ad43f1cef7ca4b19a71104d4ecf7066d" });      
     });
   });
