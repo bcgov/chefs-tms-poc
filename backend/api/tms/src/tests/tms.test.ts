@@ -199,6 +199,20 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
     });
   });
 
+  describe( 'Get Roles for a SSO User in a tenant', () => {
+    it('should return array of roles for the SSO User in the tenant with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}/ssousers/${initialSSOUserId}/roles`)
+     expect(response.status).toBe(200)
+     expect(response.body.data.roles).toBeDefined()
+     expect(response.body.data.roles).toHaveLength(3)
+     expect(response.body.data.roles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: roleId })
+      ])
+      );
+    });
+  });
+
   describe( 'Unssign a user from a role in a tenant', () => {
     it('should return an empty response with 204 indicating delete successful', async () => {
       const response = await request(testApp).delete(`/v1/tenants/${tenantId}/users/${tenantUserId}/roles/${roleId}`);      
@@ -217,5 +231,42 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
         expect.objectContaining({ id: roleId })
       ])
       );
+    });
+  });
+
+  describe( 'Get expanded Tenant details', () => {
+    it('should return expanded tenant with all the details with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}?expand=roles,tenantUserRoles`)
+      expect(response.status).toBe(200)
+      expect(response.body.data.tenant).toMatchObject({ id: tenantId })
+      expect(response.body.data.tenant.users).toBeDefined()
+      expect(response.body.data.tenant.users).toHaveLength(2)
+      expect(response.body.data.tenant.roles).toBeDefined()
+      expect(response.body.data.tenant.roles).toHaveLength(3)
+
+      expect(response.body.data.tenant.roles).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: roleId })])
+      );
+      expect(response.body.data.tenant.users).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: tenantUserId })])
+      );
+      expect(response.body.data.tenant.users).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ssoUser: expect.objectContaining({ ssoUserId: initialSSOUserId })
+          })
+        ])
+      );
+
+      expect(response.body.data.tenant.users).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ssoUser: expect.objectContaining({ ssoUserId: additionalSSOUserId })
+          })
+        ])
+      );
+ 
     });
   });
