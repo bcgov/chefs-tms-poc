@@ -184,3 +184,10 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
       expect(response.body.data.role).toMatchObject({ id: roleId });
     });
   });
+
+  describe( 'Unssign a user from a role in a tenant', () => {
+    it('should return an empty response with 204 indicating delete successful', async () => {
+      const response = await request(testApp).delete(`/v1/tenants/${tenantId}/users/${tenantUserId}/roles/${roleId}`);      
+      expect(response.status).toBe(204);     
+    });
+  });
