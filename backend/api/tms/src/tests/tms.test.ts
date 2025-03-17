@@ -123,9 +123,10 @@ describe('Health Check API', () => {
   });
 });
 
+let tenantId:string
 
 describe('Create Tenant API', () => {
-    it('should return 201 Created', async () => {      
+    it('should return basic tenant 201 Created', async () => {      
       const response = await request(testApp).post('/v1/tenants').send({
         "name": "Test Tenant",
         "ministryName": "Test Ministry",
@@ -138,7 +139,18 @@ describe('Create Tenant API', () => {
           "email": "john.smith@gov.bc.ca"
         }
       }); 
-      expect(response.status).toBe(201);
-      console.log(response.body);
+      expect(response.status).toBe(201);      
+      expect(response.body.data.tenant).toMatchObject({ name: "Test Tenant" });
+      expect(response.body.data.tenant.users[0].ssoUser).toMatchObject({ ssoUserId: "fd33f1cef7ca4b19a71104d4ecf7066b" });
+      tenantId = response.body.data.tenant.id;
+    });
+  });
+
+  describe( 'Get Tenant API', () => {
+    it('should return a basic tenant with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}`);
+      console.log(response.body)
+      expect(response.status).toBe(200);
+      expect(response.body.data.tenant).toMatchObject({ id: tenantId });
     });
   });
