@@ -128,3 +128,16 @@ let tenantId:string
       expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: "ad43f1cef7ca4b19a71104d4ecf7066d" });      
     });
   });
+
+  describe('Add a role to a tenant', () => {
+    it('should return role created and added to tenant - 201', async () => {      
+      const response = await request(testApp).post(`/v1/tenants/${tenantId}/roles`).send({
+        "role": {
+          "name": "LOB.CUSTOM_ROLE",
+          "description":"Custom role for LOB"
+      }
+      }); 
+      expect(response.status).toBe(201);            
+      expect(response.body.data.role).toMatchObject({ name: "LOB.CUSTOM_ROLE" });      
+    });
+  });
