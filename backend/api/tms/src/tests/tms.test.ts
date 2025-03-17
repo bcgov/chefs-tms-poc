@@ -174,3 +174,13 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
       expect(response.body.data.tenants[0]).toMatchObject({ id: tenantId });
     });
   });
+
+  describe( 'Assign a user to a role in a tenant', () => {
+    it('should return the user with the associated role with 201', async () => {
+      const response = await request(testApp).put(`/v1/tenants/${tenantId}/users/${tenantUserId}/roles/${roleId}`);      
+      expect(response.status).toBe(201);
+      expect(response.body.data.user).toMatchObject({ id: tenantUserId });
+      expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: initialSSOUserId });
+      expect(response.body.data.role).toMatchObject({ id: roleId });
+    });
+  });
