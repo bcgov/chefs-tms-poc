@@ -191,3 +191,17 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
       expect(response.status).toBe(204);     
     });
   });
+
+  describe( 'Get Roles for a tenant', () => {
+    it('should return array of roles for the tenant with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}/roles`)
+     expect(response.status).toBe(200)
+     expect(response.body.data.roles).toBeDefined()
+     expect(response.body.data.roles).toHaveLength(3)
+     expect(response.body.data.roles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: roleId })
+      ])
+      );
+    });
+  });
