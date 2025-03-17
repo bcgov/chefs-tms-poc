@@ -64,6 +64,7 @@ beforeAll(async () => {
     await dataSource.runMigrations();
 
     console.log('Checking if tables exist and if migrations ran successfully before commencing tests...')
+    await new Promise(resolve => setTimeout(resolve, 3000));
     const waitForDatabaseReady = async (dataSource: DataSource) => {
       for (let i = 0; i < 20; i++) {
         try {
