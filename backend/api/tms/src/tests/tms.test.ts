@@ -1,9 +1,10 @@
 import request from 'supertest';
-import app from '../app'; 
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+dotenv.config();
 
-let PostgreSqlContainer;
+let PostgreSqlContainer, testApp, App;
+
 try {
   const module = require('@testcontainers/postgresql');
   PostgreSqlContainer = module.PostgreSqlContainer;
@@ -17,24 +18,24 @@ try {
   }
 }
 
-dotenv.config();
-const testApp = new app().app;
-
-let container;
+let container:any;
 let dataSource: DataSource;
 
 beforeAll(async () => {
   try {
-    console.log('Starting PostgreSQL container...');
-    container = await new PostgreSqlContainer()
-      .withExposedPorts(5432)
-      .start();
+    console.log('Starting PostgreSQL container...');   
     
+    container = await new PostgreSqlContainer()
+      .withUsername('testuser')
+      .withPassword('testpassword')
+      .withDatabase('testdb')
+      .withExposedPorts({
+        container: 5432,
+        host: 54321  
+      })
+      .start();
+
     console.log('Container started successfully');
-    console.log(`Host: ${container.getHost()}`);
-    console.log(`Port: ${container.getMappedPort(5432)}`);
-    console.log(`Username: ${container.getUsername()}`);
-    console.log(`Database: ${container.getDatabase()}`);
 
     const testConfig = {
       type: 'postgres' as const,
@@ -55,19 +56,24 @@ beforeAll(async () => {
       }
     };
 
-    console.log('Initializing database connection...');
     dataSource = new DataSource(testConfig);
     await dataSource.initialize();
     console.log('Database connection initialized successfully');
 
     console.log('Running migrations...');
     await dataSource.runMigrations();
-    console.log('Migrations completed');
+
+    console.log('Waiting to allow the test container to spin up fully...')
+    await new Promise(resolve => setTimeout(resolve, 9000));
+    App = require('../app').default;
+    testApp = new App().app;
+    
   } catch (error) {
     console.error('Error in beforeAll:', error);
     throw error;
   }
 }, 60000); 
+
 
 afterAll(async () => {
   try {
@@ -81,7 +87,6 @@ afterAll(async () => {
             removeVolumes: true,
             force: true
           });
-      await container.removeVolumes()
       console.log('Container stopped');
     }
   } catch (error) {
@@ -92,28 +97,29 @@ afterAll(async () => {
 });
 
 describe('Health Check API', () => {
-  it('should return 200 OK', async () => {
+  it('should return 200 OK and healthy status', async () => {
     const response = await request(testApp).get('/v1/health');
     expect(response.status).toBe(200);
     expect(response.body).toMatchObject({ apiStatus: 'Healthy' });
   });
 });
 
+
 describe('Create Tenant API', () => {
-    it('should return 201 Created', async () => {
+    it('should return 201 Created', async () => {      
       const response = await request(testApp).post('/v1/tenants').send({
-        "name": "T1",
-        "ministryName": "Newwd Mtinwistry",
+        "name": "Test Tenant",
+        "ministryName": "Test Ministry",
         "user": {
-          "firstName": "Shankar",
-          "lastName": "Sethuraman",
-          "displayName": "Sethuraman, Shankar: JEDI: EX",
-          "userName": "SSETHURA",
+          "firstName": "John",
+          "lastName": "Smith",
+          "displayName": "Smith, John: MIN: EX",
+          "userName": "SMITHJ1",
           "ssoUserId": "fd33f1cef7ca4b19a71104d4ecf7066b",
-          "email": "shankar1@gov.bc.ca"
+          "email": "john.smith@gov.bc.ca"
         }
-      });
-      
+      }); 
+      expect(response.status).toBe(201);
       console.log(response.body);
     });
   });
