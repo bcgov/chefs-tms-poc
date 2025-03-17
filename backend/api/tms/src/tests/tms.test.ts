@@ -83,7 +83,7 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
     it('should return 200 OK and healthy status', async () => {
       const response = await request(testApp).get('/v1/health');
       expect(response.status).toBe(200);
-      expect(response.body).toMatchObject({ apiStatus: 'Healthy' });
+      expect(response.body).toMatchObject({ apiStatus: 'Healthy' }); 
     });
   });
 
@@ -182,6 +182,20 @@ let additionalSSOUserId:string = 'ad43f1cef7ca4b19a71104d4ecf7066d'
       expect(response.body.data.user).toMatchObject({ id: tenantUserId });
       expect(response.body.data.user.ssoUser).toMatchObject({ ssoUserId: initialSSOUserId });
       expect(response.body.data.role).toMatchObject({ id: roleId });
+    });
+  });
+
+  describe( 'Get roles for a user in a tenant', () => {
+    it('should return an an array of roles for the user with 200', async () => {
+      const response = await request(testApp).get(`/v1/tenants/${tenantId}/users/${tenantUserId}/roles`)
+      expect(response.status).toBe(200)
+      expect(response.body.data.roles).toBeDefined()
+      expect(response.body.data.roles).toHaveLength(3)
+      expect(response.body.data.roles).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: roleId })
+        ])
+      );
     });
   });
 
