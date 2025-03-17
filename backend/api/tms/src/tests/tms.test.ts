@@ -1,30 +1,28 @@
 import request from 'supertest';
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
+const dbConfig = require('../ormconfig');
 dotenv.config();
 
-let PostgreSqlContainer, testApp, App;
-
-try {
-  const module = require('@testcontainers/postgresql');
-  PostgreSqlContainer = module.PostgreSqlContainer;
-} catch (e) {
-  try {
-    const module = require('testcontainers');
-    PostgreSqlContainer = module.PostgreSqlContainer;
-  } catch (err) {
-    console.error('Could not import PostgreSqlContainer:', err);
-    process.exit(1);
-  }
-}
-
-let container:any;
+let PostgreSqlContainer, testApp, App, container
 let dataSource: DataSource;
 
 beforeAll(async () => {
+
+  try {
+    const containerModule = require('@testcontainers/postgresql');
+    PostgreSqlContainer = containerModule.PostgreSqlContainer;
+  } catch (e) {
+    try {
+      const containerModule = require('testcontainers');
+      PostgreSqlContainer = containerModule.PostgreSqlContainer;
+    } catch (err) {
+      console.error('Could not import PostgreSqlContainer:', err);
+      process.exit(1);
+    }
+  }
   try {
     console.log('Starting PostgreSQL container...');   
-    
     container = await new PostgreSqlContainer()
       .withUsername('testuser')
       .withPassword('testpassword')
@@ -35,54 +33,14 @@ beforeAll(async () => {
       })
       .start();
 
-    console.log('Container started successfully');
+    console.log('Container started...');
 
-    const testConfig = {
-      type: 'postgres' as const,
-      host: container.getHost(),
-      port: container.getMappedPort(5432),
-      username: container.getUsername(),
-      password: container.getPassword(),
-      database: container.getDatabase() || 'postgres', 
-      synchronize: false,
-      logging: true,
-      entities: ['src/entities/**/*.ts'],
-      migrations: ['./src/migrations/*.ts'],
-      subscribers: ['src/subscribers/**/*.ts'],
-      cli: {
-        entitiesDir: 'src/entities',
-        migrationsDir: 'src/migrations',
-        subscribersDir: 'src/subscribers'
-      }
-    };
-
-    dataSource = new DataSource(testConfig);
+    dataSource = new DataSource(dbConfig);
     await dataSource.initialize();
     console.log('Database connection initialized successfully');
 
     console.log('Running migrations...');
     await dataSource.runMigrations();
-
-    console.log('Checking if tables exist and if migrations ran successfully before commencing tests...')
-    await new Promise(resolve => setTimeout(resolve, 3000));
-    const waitForDatabaseReady = async (dataSource: DataSource) => {
-      for (let i = 0; i < 20; i++) {
-        try {
-          console.log(`Checking database readiness (attempt ${i + 1})...`);
-          const tables = await dataSource.query(
-            `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
-          );
-          console.log('Tables in the database:', tables.map(t => t.table_name));
-          return;
-        } catch (error) {
-          console.log('⏳ Database not ready yet, retrying...');
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      }
-      throw new Error('Database not ready or migrations failed and tables were not created');
-    };
-
-    await waitForDatabaseReady(dataSource);
 
     App = require('../app').default;
     testApp = new App().app;
@@ -149,7 +107,6 @@ describe('Create Tenant API', () => {
   describe( 'Get Tenant API', () => {
     it('should return a basic tenant with 200', async () => {
       const response = await request(testApp).get(`/v1/tenants/${tenantId}`);
-      console.log(response.body)
       expect(response.status).toBe(200);
       expect(response.body.data.tenant).toMatchObject({ id: tenantId });
     });
