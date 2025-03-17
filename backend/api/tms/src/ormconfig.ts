@@ -12,7 +12,7 @@ if(isTestEnv) {
     username: 'testuser',
     password: 'testpassword',
     database: 'testdb',
-    synchronize: false,
+    synchronize: true,
     logging: false,
     entities: [
       'src/entities/**/*.ts'

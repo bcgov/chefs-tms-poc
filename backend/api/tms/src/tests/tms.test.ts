@@ -63,8 +63,26 @@ beforeAll(async () => {
     console.log('Running migrations...');
     await dataSource.runMigrations();
 
-    console.log('Waiting to allow the test container to spin up fully...')
-    await new Promise(resolve => setTimeout(resolve, 9000));
+    console.log('Checking if tables exist and if migrations ran successfully before commencing tests...')
+    const waitForDatabaseReady = async (dataSource: DataSource) => {
+      for (let i = 0; i < 20; i++) {
+        try {
+          console.log(`Checking database readiness (attempt ${i + 1})...`);
+          const tables = await dataSource.query(
+            `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public';`
+          );
+          console.log('Tables in the database:', tables.map(t => t.table_name));
+          return;
+        } catch (error) {
+          console.log('⏳ Database not ready yet, retrying...');
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
+      throw new Error('Database not ready or migrations failed and tables were not created');
+    };
+
+    await waitForDatabaseReady(dataSource);
+
     App = require('../app').default;
     testApp = new App().app;
     
