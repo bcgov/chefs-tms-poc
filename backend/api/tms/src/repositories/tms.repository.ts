@@ -168,7 +168,7 @@ export class TMSRepository {
                 const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
                 if(tenantWithUsersAndRoles) {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
-                        (user) => user.id = tenantUserId
+                        (user) => user.id === tenantUserId
                     )
                     const matchedRole:boolean = matchingTenantUser.roles?.some((rl) => rl.role?.id === roleId)
 
