@@ -58,7 +58,7 @@ export class TMSService {
 
     public async assignUserRoles(req:Request) {
         const { tenantId, tenantUserId, roleId } = req.params;
-        const data = await this.tmsRepository.assignUserRoles(tenantId, tenantUserId, roleId)
+        const data = await this.tmsRepository.assignUserRoles(tenantId, tenantUserId, roleId,null)
         return {
            data
         }

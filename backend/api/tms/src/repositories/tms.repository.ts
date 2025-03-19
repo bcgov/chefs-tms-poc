@@ -82,7 +82,7 @@ export class TMSRepository {
     public async addTenantUsers(req:Request) {
 
         let response = {}
-        await this.manager.transaction(async() => {
+        await this.manager.transaction(async(transactionEntityManager) => {
 
         try {  
             const tenantId:string = req.params.tenantId
@@ -106,10 +106,10 @@ export class TMSRepository {
                 user.userName,user.email)       
             tenantUser.ssoUser = ssoUser
     
-            const savedTenantUser:TenantUser = await this.manager.save(tenantUser)
+            const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
 
             if(roleId) {
-                const resp = await this.assignUserRoles(tenantId,savedTenantUser.id,roleId)                
+                const resp = await this.assignUserRoles(tenantId,savedTenantUser.id,roleId,transactionEntityManager)                
                 response = resp
             }
             else {
@@ -163,11 +163,11 @@ export class TMSRepository {
         return response
     }
 
-    public async assignUserRoles(tenantId:string, tenantUserId:string, roleId:string) {
+    public async assignUserRoles(tenantId:string, tenantUserId:string, roleId:string, transactionEntityManager:EntityManager) {
         let response = {}
-        await this.manager.transaction(async() => {
+        transactionEntityManager = transactionEntityManager ? transactionEntityManager : this.manager
             try {
-                const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
+                const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId,transactionEntityManager)
                 if(tenantWithUsersAndRoles) {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
                         (user) => user.id === tenantUserId
@@ -191,7 +191,7 @@ export class TMSRepository {
                     tenantUserRole.tenantUser = matchingTenantUser
                     tenantUserRole.role = matchingRole
 
-                    const savedTenantUserRole:TenantUserRole = await this.manager.save(tenantUserRole)
+                    const savedTenantUserRole:TenantUserRole = await transactionEntityManager.save(tenantUserRole)
 
                     delete savedTenantUserRole.tenantUser.roles
 
@@ -211,7 +211,7 @@ export class TMSRepository {
                     throw error
                 }
            
-        });
+        
         return response
     }
 
@@ -338,8 +338,9 @@ export class TMSRepository {
         return roles
     }
 
-    public async getTenantsUsersAndRoles(tenantId:string,tenantUserId:string,roleId:string) {
-        const tenant = await this.manager
+    public async getTenantsUsersAndRoles(tenantId:string,tenantUserId:string,roleId:string,transactionEntityManager:EntityManager) {
+        transactionEntityManager = transactionEntityManager ? transactionEntityManager : this.manager
+        const tenant = await transactionEntityManager
             .createQueryBuilder(Tenant,"tenant")
             .leftJoinAndSelect("tenant.users", "tenantUser")
             .leftJoinAndSelect("tenantUser.ssoUser","ssoUser")
