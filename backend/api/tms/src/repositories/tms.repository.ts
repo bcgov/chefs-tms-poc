@@ -82,15 +82,18 @@ export class TMSRepository {
     public async addTenantUsers(req:Request) {
 
         let response = {}
-        await this.manager.transaction(async(transactionEntityManager) => {
+        await this.manager.transaction(async() => {
 
         try {  
             const tenantId:string = req.params.tenantId
+            const roleId:string = req.body.role?.id
+            const ssoUserId:string = req.body.user.ssoUserId
+            
             if(!await this.checkIfTenantExists(tenantId)) {  
                 throw new NotFoundError("Tenant Not Found: "+tenantId)
             } 
         
-            const tenant:Tenant = await this.getTenantIfUserDoesNotExistForTenant(req.body.user.ssoUserId,tenantId)
+            const tenant:Tenant = await this.getTenantIfUserDoesNotExistForTenant(ssoUserId,tenantId)
     
             if(!tenant) {
                 throw new ConflictError("User is already added to this tenant: "+tenantId)
@@ -103,10 +106,10 @@ export class TMSRepository {
                 user.userName,user.email)       
             tenantUser.ssoUser = ssoUser
     
-            const savedTenantUser:TenantUser = await transactionEntityManager.save(tenantUser)
+            const savedTenantUser:TenantUser = await this.manager.save(tenantUser)
 
-            if(req.body.role?.id) {
-                const resp:any = this.assignUserRoles(tenantId,savedTenantUser.id,req.body.role.id)                
+            if(roleId) {
+                const resp = await this.assignUserRoles(tenantId,savedTenantUser.id,roleId)                
                 response = resp
             }
             else {
@@ -162,9 +165,8 @@ export class TMSRepository {
 
     public async assignUserRoles(tenantId:string, tenantUserId:string, roleId:string) {
         let response = {}
-        await this.manager.transaction(async(transactionEntityManager) => {
+        await this.manager.transaction(async() => {
             try {
-               // const { tenantId, tenantUserId, roleId } = req.params;
                 const tenantWithUsersAndRoles:Tenant = await this.getTenantsUsersAndRoles(tenantId,tenantUserId,roleId)
                 if(tenantWithUsersAndRoles) {
                     const matchingTenantUser:TenantUser =  tenantWithUsersAndRoles.users.find(
@@ -189,16 +191,13 @@ export class TMSRepository {
                     tenantUserRole.tenantUser = matchingTenantUser
                     tenantUserRole.role = matchingRole
 
-                    const savedTenantUserRole:TenantUserRole = await transactionEntityManager.save(tenantUserRole)
+                    const savedTenantUserRole:TenantUserRole = await this.manager.save(tenantUserRole)
 
                     delete savedTenantUserRole.tenantUser.roles
 
                     response =  {
                         user: savedTenantUserRole.tenantUser,
-                        role: savedTenantUserRole.role,
-                        // id: savedTenantUserRole.id,
-                        // createdDateTime: savedTenantUserRole.createdDateTime,
-                        // UpdateDateColumn: savedTenantUserRole.updatedDateTime
+                        role: savedTenantUserRole.role                     
                     }
 
                 }
