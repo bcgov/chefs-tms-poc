@@ -150,7 +150,9 @@ export class TMSRepository {
                 role.description = requestRole.description
                 role.tenant = tenant
                 const savedRole = await transactionEntityManager.save(role)
+                delete savedRole.tenant
                 response = savedRole
+
 
             }
             catch(error) {
