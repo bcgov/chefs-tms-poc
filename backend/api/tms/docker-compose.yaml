@@ -32,6 +32,7 @@ services:
       BCGOV_TOKEN_URL: https://loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token
       BC_GOV_SSO_CLIENT_ID: client-id-here
       BCGOV_SSO_CLIENT_SECRET: client-secret-here
+      LOG_LEVEL: info
     ports:
       - "4144:4144"
     networks:

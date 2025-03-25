@@ -9,6 +9,7 @@ import { TMSConstants } from '../common/tms.constants'
 import { TenantUserRole } from '../entities/TenantUserRole'
 import { NotFoundError } from '../errors/NotFoundError'
 import { ConflictError } from '../errors/ConflictError'
+import logger from '../common/logger'
 
 export class TMSRepository {
 
@@ -70,7 +71,7 @@ export class TMSRepository {
                 .where('tenant.id = :id', { id: savedTenant.id })
                 .getOne(); 
         } catch(error) {
-            console.error('Create tenant transaction failure - rolling back inserts ', error);
+            logger.error('Create tenant transaction failure - rolling back inserts ', error);
             throw error
         }
     });
@@ -119,7 +120,7 @@ export class TMSRepository {
         }
         
         catch(error) {
-            console.error('Add user to a tenant transaction failure - rolling back inserts ', error);
+            logger.error('Add user to a tenant transaction failure - rolling back inserts ', error);
             throw error
         }
         
@@ -156,7 +157,7 @@ export class TMSRepository {
 
             }
             catch(error) {
-                console.error('Create Role for tenant transaction failure - rolling back inserts ',error)
+                logger.error('Create Role for tenant transaction failure - rolling back inserts ',error)
                 throw error
             }
 
@@ -209,7 +210,7 @@ export class TMSRepository {
 
                 }
                 catch(error) {
-                    console.error('Assign role to user transaction failure - rolling back inserts ',error)
+                    logger.error('Assign role to user transaction failure - rolling back inserts ',error)
                     throw error
                 }
            

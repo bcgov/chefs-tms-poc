@@ -3,6 +3,7 @@ import {TMSRepository} from '../repositories/tms.repository'
 import { connection } from '../common/db.connection'
 import { URLSearchParams } from 'url'
 import axios from 'axios';
+import logger from '../common/logger'
 
 export class TMSService {
 
@@ -97,7 +98,7 @@ export class TMSService {
             return await response.data
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             throw new Error("Error invoking BC GOV SSO API. "+error)
         }
     }

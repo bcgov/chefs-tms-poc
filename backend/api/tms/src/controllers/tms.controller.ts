@@ -3,6 +3,7 @@ import { TMSService } from '../services/tms.service'
 import { ErrorHandler } from '../common/error.handler';
 import { NotFoundError } from '../errors/NotFoundError';
 import { ConflictError } from '../errors/ConflictError';
+import logger from '../common/logger'
 
 export class TMSController {
 
@@ -24,7 +25,7 @@ export class TMSController {
         res.status(201).send(tenantResponse);
     } 
     catch(error) {
-            console.log(error)
+            logger.error(error)
             this.errorHandler.generalError(res,"Error occurred during tenant creation", error.message, 500, "Internal Server Error")
         }
     }
@@ -35,7 +36,7 @@ export class TMSController {
             res.status(201).send(response)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred adding user to the tenant", error.message, error.statusCode, "Not Found")
             }
@@ -54,7 +55,7 @@ export class TMSController {
             res.status(200).send(tenants)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             this.errorHandler.generalError(res,"Error occurred getting tenants for a user", error.message, 500, "Internal Server Error")
         }
               
@@ -66,7 +67,7 @@ export class TMSController {
             res.status(200).send(users)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             this.errorHandler.generalError(res,"Error occurred getting users for a tenant", error.message, 500, "Internal Server Error")
         }
     }
@@ -77,7 +78,7 @@ export class TMSController {
             res.status(201).send(role)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred creating role", error.message, error.statusCode, "Not Found")
             }
@@ -96,7 +97,7 @@ export class TMSController {
             res.status(201).send(userRole)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred assigning user role", error.message, error.statusCode, "Not Found")
             }
@@ -115,7 +116,7 @@ export class TMSController {
             return res.status(200).send(roles)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred getting tenant roles", error.message, error.statusCode, "Not Found")
             }
@@ -131,7 +132,7 @@ export class TMSController {
             return res.status(200).send(roles)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred getting roles for user", error.message, error.statusCode, "Not Found")
             }
@@ -147,7 +148,7 @@ export class TMSController {
             return res.status(204).send()
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)            
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred unassigning user role", error.message, error.statusCode, "Not Found")
             }
@@ -173,7 +174,7 @@ export class TMSController {
             return res.status(200).send(tenant)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)            
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred getting a tenant", error.message, error.statusCode, "Not Found")
             }
@@ -189,7 +190,7 @@ export class TMSController {
             return res.status(200).send(roles)
         }
         catch(error) {
-            console.log(error)
+            logger.error(error)            
             if (error instanceof NotFoundError) {
                 this.errorHandler.generalError(res,"Error occurred getting roles for SSO user", error.message, error.statusCode, "Not Found")
             }
