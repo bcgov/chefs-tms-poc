@@ -1,6 +1,8 @@
 import winston from 'winston';
 import 'winston-daily-rotate-file';
 import rTracer from 'cls-rtracer';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 const { combine, timestamp, printf, colorize } = winston.format;
 
