@@ -68,9 +68,7 @@ parameters:
   - name: LOG_LEVEL
     value: "info"
   - name: LOGS_VOLUME_CAPACITY
-    description: "Volume space available for logs"
     value: "128Mi"
-    required: true
 
 objects:
   - apiVersion: v1
