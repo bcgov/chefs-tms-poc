@@ -41,6 +41,9 @@ There are two ways to run this API locally.
 
 4. DEBUGGING STEPS - docker-compose:
 
+   If docker-compose up results in a migration failure due to a weird path issue with db.connection.ts, run:
+   dos2unix start_api.sh (under backend/api/tms)
+
     To clear the existing docker-compose images and configurations, run the following commands in sequence:
 
     1. docker compose down --volumes --remove-orphans
@@ -49,6 +52,6 @@ There are two ways to run this API locally.
 
     4. docker compose up --build
 
-5. Generate migration after entity changes:
+6. Generate migration after entity changes:
 
     1. npx typeorm-ts-node-commonjs migration:generate -d ./src/common/db.connection.ts ./src/migrations/<name>
